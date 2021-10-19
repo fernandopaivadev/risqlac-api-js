@@ -1,0 +1,21 @@
+{
+  "HTTP_SERVER_PORT": "3000",
+  "DATABASE_URL": "postgres://user:password@host/database_name",
+  "JWT": {
+    "secret": "0834j3f289j028jd28ejd028e",
+    "expTime": "86400000"
+  },
+  "RECOVERY_JWT": {
+    "secret": "laksjd98j38jd983j928j9d83",
+    "expTime": "300000"
+  },
+  "REFRESH_TOKEN": {
+    "expTime": 2592000000
+  },
+  "SUPPORT_EMAIL": {
+    "host": "host",
+    "email": "email",
+    "password": "password"
+  },
+  "RESET_PASSWORD_LINK": "https://example.mysite.com/#/reset-password"
+}
