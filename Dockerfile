@@ -1,7 +1,7 @@
 FROM node
 
-WORKDIR /usr/server/uirapuru-api
+WORKDIR /usr/server/app
 COPY . .
 EXPOSE 3000/tcp
 
-CMD yarn start
+CMD yarn dev

@@ -111,7 +111,7 @@ export default {
     parameters: [
       {
         in: 'query',
-        name: 'uuid',
+        name: 'id',
         required: 'true',
         type: 'string',
         format: 'uuid',
@@ -330,104 +330,6 @@ export default {
       }
     }
   },
-  firstUser: {
-    summary: 'Create the first user',
-    requestBody: {
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              access_level: {
-                type: 'string'
-              },
-              username: {
-                type: 'string'
-              },
-              hashed_password: {
-                type: 'string'
-              },
-              email: {
-                type: 'string'
-              },
-              phone: {
-                type: 'string'
-              },
-              company: {
-                name: {
-                  type: 'string'
-                },
-                trade_name: {
-                  type: 'string'
-                },
-                cnpj: {
-                  type: 'string'
-                },
-                description: {
-                  type: 'string'
-                }
-              },
-              person: {
-                name: {
-                  type: 'string'
-                },
-                cpf: {
-                  type: 'string'
-                },
-                birth: {
-                  type: 'string'
-                }
-              }
-            },
-            example: {
-              access_level: 'client',
-              username: 'username',
-              hashed_password: 'passwordExample',
-              email: 'user@provider.com',
-              phone: '91999999999',
-              company: {
-                name: 'Company name',
-                trade_name: 'Company trade name',
-                cnpj: '00000000000000',
-                description: 'Description company'
-              },
-              person: {
-                name: 'Person name',
-                cpf: '00000000000',
-                birth: '12121990'
-              }
-            }
-          }
-        }
-      }
-    },
-    responses: {
-      '201': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: 'user created'
-              }
-            }
-          }
-        }
-      },
-      '500': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: '<<error message>>'
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   create: {
     summary: 'Create user',
     requestBody: {
@@ -436,13 +338,13 @@ export default {
           schema: {
             type: 'object',
             properties: {
-              access_level: {
-                type: 'string'
+              is_admin: {
+                type: 'boolean'
               },
               username: {
                 type: 'string'
               },
-              hashed_password: {
+              password: {
                 type: 'string'
               },
               email: {
@@ -450,50 +352,14 @@ export default {
               },
               phone: {
                 type: 'string'
-              },
-              company: {
-                name: {
-                  type: 'string'
-                },
-                trade_name: {
-                  type: 'string'
-                },
-                cnpj: {
-                  type: 'string'
-                },
-                description: {
-                  type: 'string'
-                }
-              },
-              person: {
-                name: {
-                  type: 'string'
-                },
-                cpf: {
-                  type: 'string'
-                },
-                birth: {
-                  type: 'string'
-                }
               }
             },
             example: {
-              access_level: 'client',
+              is_admin: 'client',
               username: 'username',
-              hashed_password: 'passwordExample',
+              password: 'password_example',
               email: 'user@provider.com',
-              phone: '91999999999',
-              company: {
-                name: 'Company name',
-                trade_name: 'Company trade name',
-                cnpj: '00000000000000',
-                description: 'Description company'
-              },
-              person: {
-                name: 'Person name',
-                cpf: '00000000000',
-                birth: '12121990'
-              }
+              phone: '91999999999'
             }
           }
         }
@@ -507,18 +373,6 @@ export default {
               type: 'string',
               example: {
                 message: 'user created'
-              }
-            }
-          }
-        }
-      },
-      '403': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: 'admin access only'
               }
             }
           }
@@ -671,7 +525,7 @@ export default {
     }
   },
   data: {
-    summary: 'Return the target user data',
+    summary: 'Return the user data',
     security: [
       {
         'bearerAuth': []
@@ -804,13 +658,10 @@ export default {
               id: {
                 type: 'string'
               },
-              access_level: {
-                type: 'string'
+              is_admin: {
+                type: 'boolean'
               },
               username: {
-                type: 'string'
-              },
-              hashed_password: {
                 type: 'string'
               },
               email: {
@@ -818,51 +669,14 @@ export default {
               },
               phone: {
                 type: 'string'
-              },
-              company: {
-                name: {
-                  type: 'string'
-                },
-                trade_name: {
-                  type: 'string'
-                },
-                cnpj: {
-                  type: 'string'
-                },
-                description: {
-                  type: 'string'
-                }
-              },
-              person: {
-                name: {
-                  type: 'string'
-                },
-                cpf: {
-                  type: 'string'
-                },
-                birth: {
-                  type: 'string'
-                }
               }
             },
             example: {
               id: 24,
-              access_level: 'client',
+              is_admin: false,
               username: 'modifiedusername',
-              hashed_password: 'modifiedpasswordExample',
               email: 'usermodified@provider.com',
-              phone: '91999999999',
-              company: {
-                name: 'Modified company name',
-                trade_name: 'Company trade name',
-                cnpj: '00000000000000',
-                description: 'Description company'
-              },
-              person: {
-                name: 'Modified person name',
-                cpf: '00000000000',
-                birth: '12121990'
-              }
+              phone: '91999999999'
             }
           }
         }
@@ -882,25 +696,13 @@ export default {
         }
 
       },
-      '403': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: 'admin access only'
-              }
-            }
-          }
-        }
-      },
       '404': {
         content: {
           'application/json': {
             schema: {
               type: 'string',
               example: {
-                message: 'target user not found'
+                message: 'user not found'
               }
             }
           }
@@ -973,7 +775,7 @@ export default {
             schema: {
               type: 'string',
               example: {
-                message: 'target user not found'
+                message: 'user not found'
               }
             }
           }

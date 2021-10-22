@@ -3,22 +3,22 @@ version: "3.7"
 services:
   db:
     image: postgres
-    container_name: risqlabdb
+    container_name: db
     ports:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: 21392996
-      POSTGRES_USER: risqlab
-      POSTGRES_DB: risqlabdb
+      POSTGRES_USER: risqlac
+      POSTGRES_DB: risqlacdb
     volumes:
       - pgdata:/data/postgres
   app:
     build: .
-    container_name: risqlab-api
+    container_name: app
     ports:
       - 3000:3000
     volumes:
-      - .:/usr/server/risqlab-api
+      - .:/usr/server/app
     links:
       - db
     depends_on:
