@@ -286,9 +286,8 @@ export default {
       const users = await prisma.user.findMany({
         select: {
           id: true,
-          username: true,
           email: true,
-          phone: true,
+          name: true,
           is_admin: true
         }
       }).catch((err: any) => {
@@ -310,41 +309,42 @@ export default {
     const { user } = req
     const targetUserId = req.query?.id
 
-    if (user?.is_admin && targetUserId) {
-      const targetUser = await prisma.user.findUnique({
-        where: {
-          id: String(targetUserId)
-        },
-        select: {
-          id: true,
-          is_admin: true,
-          email: true,
-          username: true,
-          phone: true
-        }
-      }).catch((err: any) => {
-        res.status(500).json({ message: err.message })
-        return
-      })
-
-      if (targetUser) {
-        res.status(200).json({
-          user: targetUser
-        })
-      } else {
-        res.status(404).json({ message: 'user not found' })
+    const targetUser = await prisma.user.findUnique({
+      where: {
+        id: user?.is_admin && targetUserId ?
+          String(targetUserId)
+          :
+          user?.id
+      },
+      select: {
+        hashed_password: false
       }
+    }).catch((err: any) => {
+      res.status(500).json({ message: err.message })
+      return
+    })
+
+    if (targetUser) {
+      res.status(200).json({
+        user: targetUser
+      })
+    } else {
+      res.status(404).json({ message: 'user not found' })
     }
   },
 
   create: async (req: CustomRequest, res: Response): Promise<void> => {
-    req.body.hashed_password = await hash(
-      req.body.password,
+    const body = {
+      ...req.body
+    }
+
+    body.hashed_password = await hash(
+      body.password,
       Math.floor(Math.random() * 10 + 10)
     )
 
     const newUser = {
-      ...req.body
+      ...body
     }
 
     delete newUser.password
@@ -365,93 +365,83 @@ export default {
 
   update: async (req: CustomRequest, res: Response): Promise<void> => {
     const { user } = req
-    const targetUserId = req.body.id
+    const targetUserId = req.body?.id
 
-    if (targetUserId) {
-      const targetUser = await prisma.user.findUnique({
+    const targetUser = await prisma.user.findUnique({
+      where: {
+        id: user?.is_admin && targetUserId ?
+          String(targetUserId)
+          :
+          user?.id
+      }
+    }).catch((err: any) => {
+      res.status(500).json({ message: err.message })
+      return
+    })
+
+    if (targetUser) {
+      const body = {
+        ...req.body
+      }
+
+      const newUser = {
+        id: body.id,
+        username: body.username,
+        is_admin: body.is_admin,
+        email: body.email,
+        phone: body.phone,
+        updated_at: new Date()
+      }
+
+      if (!req.user?.is_admin) {
+        delete newUser.is_admin
+      }
+
+      await prisma.user.update({
         where: {
-          id: String(targetUserId)
-        }
+          id: targetUser.id
+        },
+        data: newUser
       }).catch((err: any) => {
         res.status(500).json({ message: err.message })
         return
       })
 
-      if (targetUser) {
-        if (user?.is_admin || targetUser.id === user?.id) {
-          const body = {
-            ...req.body
-          }
-
-          const newUser = {
-            id: body.id,
-            username: body.username,
-            is_admin: body.is_admin,
-            email: body.email,
-            phone: body.phone,
-            updated_at: new Date()
-          }
-
-          if (!req.user?.is_admin) {
-            delete newUser.is_admin
-          }
-
-          await prisma.user.update({
-            where: {
-              id: targetUser.id
-            },
-            data: newUser
-          }).catch((err: any) => {
-            res.status(500).json({ message: err.message })
-            return
-          })
-
-          res.status(200).json({ message: 'target user updated' })
-        } else {
-          res.status(403).json({ message: 'admin access only' })
-        }
-      } else {
-        res.status(404).json({ message: 'target user not found' })
-      }
+      res.status(200).json({ message: 'user updated' })
     } else {
-      res.status(412).json({ message: 'missing arguments' })
+      res.status(404).json({ message: 'user not found' })
     }
   },
 
   delete: async (req: CustomRequest, res: Response): Promise<void> => {
     const { user } = req
-    const targetUserId = req.query?.id
+    const targetUserId = req.body?.id
 
-    if (targetUserId) {
-      const targetUser = await prisma.user.findUnique({
+    const targetUser = await prisma.user.findUnique({
+      where: {
+        id: user?.is_admin && targetUserId ?
+          String(targetUserId)
+          :
+          user?.id
+      }
+    }).catch((err: any) => {
+      res.status(500).json({ message: err.message })
+      return
+    })
+
+    if (targetUser) {
+      await prisma.user.delete({
         where: {
-          id: String(targetUserId)
+          id: targetUser.id
         }
       }).catch((err: any) => {
         res.status(500).json({ message: err.message })
         return
       })
 
-      if (targetUser) {
-        if (user?.is_admin || targetUser.id === user?.id) {
-          await prisma.user.delete({
-            where: {
-              id: targetUser.id
-            }
-          }).catch((err: any) => {
-            res.status(500).json({ message: err.message })
-            return
-          })
-
-          res.status(200).json({ message: 'target user deleted' })
-        } else {
-          res.status(403).json({ message: 'admin access only' })
-        }
-      } else {
-        res.status(404).json({ message: 'target user not found' })
-      }
+      res.status(200).json({ message: 'user deleted' })
     } else {
-      res.status(412).json({ message: 'missing arguments' })
+      res.status(404).json({ message: 'user not found' })
     }
   }
 }
