@@ -317,6 +317,14 @@ export default {
           user?.id
       },
       select: {
+        id: true,
+        is_admin: true,
+        username: true,
+        name: true,
+        email: true,
+        phone: true,
+        created_at: true,
+        updated_at: true,
         hashed_password: false
       }
     }).catch((err: any) => {
