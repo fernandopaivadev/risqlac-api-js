@@ -19,8 +19,13 @@ export default (
         console.log(`VERIFY TOKEN: ERROR > ${err.message}`)
         res.status(401).json({ message: err.message })
       } else {
-        const id = Number(payload?.id)
-        req.userId = id
+        const id = String(payload?.id)
+
+        if (id) {
+          req.userId = id
+        } else {
+          res.status(401).json({ message: 'invalid user id' })
+        }
         next()
       }
     })
