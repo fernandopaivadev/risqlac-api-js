@@ -15,23 +15,24 @@ export default {
       await prisma.product.create({
         data: body
       }).catch((err: any) => {
-        res.json(500).json({ message: err.message})
+        res.status(500).json({ message: err.message})
+        return
       })
 
-      res.json(201).json({ message: 'product created' })
+      res.status(201).json({ message: 'product created' })
     } else {
-      res.json(403).json({ message: 'admin access only' })
+      res.status(403).json({ message: 'admin access only' })
     }
   },
 
   list: async (req: CustomRequest, res: Response): Promise<void> => {
     const products = await prisma.product.findMany()
+      .catch((err: any) => {
+        res.status(500).json({ message: err.message})
+        return
+      })
 
-    if (products.length) {
-      res.status(200).json({ products })
-    } else {
-      res.status(404).json({ message: 'products not found' })
-    }
+    res.status(200).json({ products })
   },
 
   data: async (req: CustomRequest, res: Response): Promise<void> => {
@@ -42,6 +43,9 @@ export default {
         where: {
           id: String(id)
         }
+      }).catch((err: any) => {
+        res.status(500).json({ message: err.message})
+        return
       })
 
       if (product) {
@@ -58,7 +62,7 @@ export default {
     const { user } = req
 
     if (user?.is_admin) {
-      const id = req.query?.id
+      const id = req.body?.id
 
       if (id) {
         const body = {
@@ -70,6 +74,9 @@ export default {
             id: String(id)
           },
           data: body
+        }).catch((err: any) => {
+          res.status(500).json({ message: err.message})
+          return
         })
 
         if (product) {
@@ -96,6 +103,9 @@ export default {
           where: {
             id: String(id)
           }
+        }).catch((err: any) => {
+          res.status(500).json({ message: err.message})
+          return
         })
 
         if (product) {

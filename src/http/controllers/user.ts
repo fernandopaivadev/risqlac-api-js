@@ -89,7 +89,7 @@ export default {
   },
 
   refreshToken: async (req: Request, res: Response): Promise<void> => {
-    const id = req.query?.uuid
+    const id = req.query?.id
 
     if (id) {
       const refreshToken = await prisma.refresh_tokens.findFirst({

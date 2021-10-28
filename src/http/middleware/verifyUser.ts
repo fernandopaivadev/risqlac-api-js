@@ -17,6 +17,7 @@ export default async (
         id: true,
         is_admin: true,
         email: true,
+        name: true,
         username: true,
         phone: true,
         created_at: true,
