@@ -11,20 +11,20 @@ generator client {
 }
 
 model user {
-  id              String           @id @default(uuid())
-  username        String           @db.VarChar(32)
-  is_admin        Boolean          @default(false)
-  name            String           @db.VarChar(255)
-  email           String           @db.VarChar(64)
-  phone           String           @db.VarChar(64)
-  hashed_password String           @db.VarChar(255)
-  created_at      DateTime         @default(now()) @db.Timestamp
-  updated_at      DateTime         @default(now()) @db.Timestamp
-  refresh_tokens  refresh_tokens[]
-  products        product[]
+  id              String          @id @default(uuid())
+  username        String          @db.VarChar(32)
+  is_admin        Boolean         @default(false)
+  name            String          @db.VarChar(255)
+  email           String          @db.VarChar(64)
+  phone           String          @db.VarChar(64)
+  hashed_password String          @db.VarChar(255)
+  created_at      DateTime        @default(now()) @db.Timestamp
+  updated_at      DateTime        @default(now()) @db.Timestamp
+  refresh_token   refresh_token[]
+  product         product[]
 }
 
-model refresh_tokens {
+model refresh_token {
   id         String   @id @default(uuid()) @db.VarChar(255)
   expiresIn  String   @db.VarChar(32)
   user_id    String   @db.Text
@@ -42,7 +42,6 @@ model product {
   storage         String   @db.Text
   incompatibility String   @db.Text
   precautions     String   @db.Text
-  residue         String   @db.Text
   user_id         String   @db.Text
   created_at      DateTime @default(now()) @db.Timestamp
   updated_at      DateTime @default(now()) @db.Timestamp
