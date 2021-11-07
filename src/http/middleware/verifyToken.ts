@@ -17,7 +17,7 @@ export default (
     verify(token, secret, (err, payload) => {
       if (err) {
         console.log(`VERIFY TOKEN: ERROR > ${err.message}`)
-        res.status(401).json({ message: err.message })
+        res.status(401).json({ message: 'invalid token' })
       } else {
         const id = String(payload?.id)
 

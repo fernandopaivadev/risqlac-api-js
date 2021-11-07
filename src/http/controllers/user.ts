@@ -42,7 +42,7 @@ export default {
         )
 
         if (isValid) {
-          await prisma.refresh_tokens.deleteMany({
+          await prisma.refresh_token.deleteMany({
             where: {
               user_id: user.id
             }
@@ -51,7 +51,7 @@ export default {
             return
           })
 
-          const refreshToken = await prisma.refresh_tokens.create({
+          const refreshToken = await prisma.refresh_token.create({
             data: {
               expiresIn:
                 String(new Date().getTime() +
@@ -92,7 +92,7 @@ export default {
     const id = req.query?.id
 
     if (id) {
-      const refreshToken = await prisma.refresh_tokens.findFirst({
+      const refreshToken = await prisma.refresh_token.findFirst({
         where: {
           id: String(id)
         }
@@ -105,7 +105,7 @@ export default {
         const currentTime = new Date().getTime()
         const expiresIn = Number(refreshToken.expiresIn)
 
-        await prisma.refresh_tokens.delete({
+        await prisma.refresh_token.delete({
           where: {
             id: refreshToken.id
           }
@@ -115,7 +115,7 @@ export default {
         })
 
         if (currentTime <= expiresIn) {
-          const newRefreshToken = await prisma.refresh_tokens.create({
+          const newRefreshToken = await prisma.refresh_token.create({
             data: {
               expiresIn:
                 String(new Date().getTime() +
