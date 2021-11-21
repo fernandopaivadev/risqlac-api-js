@@ -3,6 +3,7 @@ import { Router, Response } from 'express'
 import { CustomRequest } from '@types'
 
 import product from './controllers/product'
+import symbol from './controllers/symbol'
 import user from './controllers/user'
 import verifyToken from './middleware/verifyToken'
 import verifyUser from './middleware/verifyUser'
@@ -11,7 +12,8 @@ const controllers: { [key: string]: {
     [key: string]: (req: CustomRequest, res: Response) => Promise<void>
 }} = {
   user,
-  product
+  product,
+  symbol
 }
 
 const authNotRequired = [

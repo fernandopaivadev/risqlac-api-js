@@ -33,17 +33,9 @@ model refresh_token {
   user       user?    @relation(fields: [user_id], references: [id])
 }
 
-model symbol {
-  id         String   @id @default(uuid()) @db.VarChar(255)
-  image      String   @db.Text
-  created_at DateTime @default(now()) @db.Timestamp
-  updated_at DateTime @default(now()) @db.Timestamp
-  product_id String?  @db.VarChar(255)
-  product    product? @relation(fields: [product_id], references: [id])
-}
-
 model product {
   id              String   @id @default(uuid()) @db.VarChar(255)
+  symbols         String   @db.Text
   synonym         String   @db.Text
   class           String   @db.Text
   subclass        String   @db.Text
@@ -54,5 +46,4 @@ model product {
   updated_at      DateTime @default(now()) @db.Timestamp
   user_id         String   @db.VarChar(255)
   user            user?    @relation(fields: [user_id], references: [id])
-  symbol          symbol[]
 }

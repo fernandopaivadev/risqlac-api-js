@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "user" (
-    "id" TEXT NOT NULL,
+    "id" VARCHAR(255) NOT NULL,
     "username" VARCHAR(32) NOT NULL,
     "is_admin" BOOLEAN NOT NULL DEFAULT false,
     "name" VARCHAR(255) NOT NULL,
@@ -17,9 +17,9 @@ CREATE TABLE "user" (
 CREATE TABLE "refresh_token" (
     "id" VARCHAR(255) NOT NULL,
     "expiresIn" VARCHAR(32) NOT NULL,
-    "user_id" TEXT NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "user_id" VARCHAR(255) NOT NULL,
 
     CONSTRAINT "refresh_token_pkey" PRIMARY KEY ("id")
 );
@@ -27,16 +27,16 @@ CREATE TABLE "refresh_token" (
 -- CreateTable
 CREATE TABLE "product" (
     "id" VARCHAR(255) NOT NULL,
+    "symbols" TEXT NOT NULL,
     "synonym" TEXT NOT NULL,
-    "symbol" TEXT NOT NULL,
     "class" TEXT NOT NULL,
     "subclass" TEXT NOT NULL,
     "storage" TEXT NOT NULL,
     "incompatibility" TEXT NOT NULL,
     "precautions" TEXT NOT NULL,
-    "user_id" TEXT NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "user_id" VARCHAR(255) NOT NULL,
 
     CONSTRAINT "product_pkey" PRIMARY KEY ("id")
 );

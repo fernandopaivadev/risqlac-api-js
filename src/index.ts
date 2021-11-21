@@ -1,4 +1,5 @@
 import { createServer } from 'http'
+import { stdout } from 'process'
 
 import config from '@config'
 
@@ -9,9 +10,9 @@ console.clear()
 const httpServer = createServer(app)
 
 httpServer.on('error', err => {
-  console.log(`\nHTTP SERVER: ERROR > ${err.message}`)
+  stdout.write(`\nHTTP SERVER: ERROR > ${err.message}`)
 })
 
 httpServer.listen(config.HTTP_SERVER_PORT)
 
-console.log(`\nAPI: LISTENING ON PORT ${config.HTTP_SERVER_PORT}`)
+stdout.write(`\nAPI: LISTENING ON PORT ${config.HTTP_SERVER_PORT}`)
