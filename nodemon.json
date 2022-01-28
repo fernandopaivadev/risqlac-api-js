@@ -7,6 +7,6 @@
   "watch": [
     "src"
   ],
-  "exec": "npx prisma migrate deploy && npx prisma generate && npm run build && node ./dist/index.js",
+  "exec": "yarn build && node ./dist/index.js",
   "ext": "ts"
 }

@@ -1,5 +1,6 @@
 import { Response, NextFunction } from 'express'
 import { verify } from 'jsonwebtoken'
+import { stdout } from 'process'
 
 import config from '@config'
 import { CustomRequest } from '@types'
@@ -14,18 +15,18 @@ export default (
   if (token) {
     const { secret } = config.JWT
 
-    verify(token, secret, (err, payload) => {
+    verify(token, secret, (err, payload: any) => {
       if (err) {
-        console.log(`VERIFY TOKEN: ERROR > ${err.message}`)
+        stdout.write(`VERIFY TOKEN: ERROR > ${err.message}`)
         res.status(401).json({ message: err.message })
       } else {
-        const id = Number(payload?.id)
+        const id = String(payload?.id)
         req.userId = id
         next()
       }
     })
   } else {
-    console.log('VERIFY TOKEN: ERROR > missing token')
+    stdout.write('VERIFY TOKEN: ERROR > missing token')
     res.status(401).json({ message: 'missing token' })
   }
 }

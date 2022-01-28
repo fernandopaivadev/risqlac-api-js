@@ -17,13 +17,14 @@ export default async (
         id: true,
         is_admin: true,
         email: true,
+        name: true,
         username: true,
         phone: true,
         created_at: true,
         updated_at: true
       }
-    }).catch((err: any) => {
-      res.status(500).json({ message: err.message })
+    }).catch((err: Error) => {
+      next(err)
       return
     })
 

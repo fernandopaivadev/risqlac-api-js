@@ -1,19 +1,25 @@
-import { Router, Response } from 'express'
+import { Router, Response, NextFunction } from 'express'
 
 import { CustomRequest } from '@types'
 
+import product from './controllers/product'
+import symbol from './controllers/symbol'
 import user from './controllers/user'
+import errorHandler from './middleware/errorHandler'
 import verifyToken from './middleware/verifyToken'
 import verifyUser from './middleware/verifyUser'
 
 const controllers: { [key: string]: {
-    [key: string]: (req: CustomRequest, res: Response) => Promise<void>
+  [key: string]: (req: CustomRequest, res: Response, next: NextFunction) => Promise<void>
 }} = {
-  user
+  user,
+  product,
+  symbol
 }
 
 const authNotRequired = [
   '/user/auth',
+  '/user/create',
   '/user/refresh-token',
   '/user/forgot-password',
   '/user/reset-password'
@@ -57,16 +63,17 @@ Object.keys(controllers).forEach((controllerName: string) => {
       if (authNotRequired.includes(path)) {
         routes[method](
           path,
-          controller
+          controller,
+          errorHandler
         )
       } else {
         routes[method](
           path,
           verifyToken,
           verifyUser,
-          controller
+          controller,
+          errorHandler
         )
-
       }
     }
   })

@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 interface CustomRequest extends Request {
-  userId: number
+  userId: string
   user: {
     id: string,
     is_admin: boolean,
