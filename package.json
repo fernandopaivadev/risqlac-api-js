@@ -11,7 +11,7 @@
     "dev": "nodemon",
     "test": "jest",
     "build": "rm -rf dist && babel src --extensions \".ts\" --out-dir dist --copy-files --no-copy-ignored",
-    "start": "yarn --frozen-lockfile && npx prisma generate && yarn build && npx pm2-runtime ./dist/index.js",
+    "start": "yarn build && npx pm2 start ./dist/index.js",
     "lint": "eslint --fix src/**/*.ts",
     "v": "sh -c 'npm version ${0} -no-git-tag-version'"
   },
