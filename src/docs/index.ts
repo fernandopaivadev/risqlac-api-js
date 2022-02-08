@@ -19,7 +19,6 @@ const docs: {
 
 const authNotRequired = [
   '/user/auth',
-  '/user/refresh-token',
   '/user/forgot-password',
   '/user/reset-password'
 ]
@@ -88,7 +87,7 @@ Object.keys(controllers).forEach((controllerName: string) => {
 const swaggerFile = {
   openapi: '3.0.0',
   info: {
-    title: 'RisqLAB API',
+    title: 'RisqLAC API',
     description,
     version,
     contact: {
@@ -110,7 +109,7 @@ const swaggerFile = {
 }
 
 const swaggerConfig: SwaggerUiOptions = {
-  customSiteTitle: 'RisqLAB API'
+  customSiteTitle: 'RisqLAC API'
 }
 
 export {

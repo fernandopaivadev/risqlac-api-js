@@ -42,27 +42,6 @@ export default {
         )
 
         if (isValid) {
-          await prisma.refresh_token.deleteMany({
-            where: {
-              user_id: user.id
-            }
-          }).catch((err: Error) => {
-            next(err)
-            return
-          })
-
-          const refreshToken = await prisma.refresh_token.create({
-            data: {
-              expiresIn:
-                String(new Date().getTime() +
-                config.REFRESH_TOKEN.expTime),
-              user_id: user.id
-            }
-          }).catch((err: Error) => {
-            next(err)
-            return
-          })
-
           const { secret, expTime } = config.JWT
 
           const token = sign(
@@ -74,78 +53,13 @@ export default {
           )
 
           res.status(200).json({
-            token,
-            refreshToken
+            token
           })
         } else {
           res.status(401).json({ message: 'incorrect password' })
         }
       } else {
         res.status(404).json({ message: 'user not found' })
-      }
-    } else {
-      res.status(412).json({ message: 'missing arguments' })
-    }
-  },
-
-  refreshToken: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = req.query?.id
-
-    if (id) {
-      const refreshToken = await prisma.refresh_token.findFirst({
-        where: {
-          id: String(id)
-        }
-      }).catch((err: Error) => {
-        next(err)
-        return
-      })
-
-      if (refreshToken) {
-        const currentTime = new Date().getTime()
-        const expiresIn = Number(refreshToken.expiresIn)
-
-        await prisma.refresh_token.delete({
-          where: {
-            id: refreshToken.id
-          }
-        }).catch((err: Error) => {
-          next(err)
-          return
-        })
-
-        if (currentTime <= expiresIn) {
-          const newRefreshToken = await prisma.refresh_token.create({
-            data: {
-              expiresIn:
-                String(new Date().getTime() +
-                config.REFRESH_TOKEN.expTime),
-              user_id: refreshToken.user_id
-            }
-          }).catch((err: Error) => {
-            next(err)
-            return
-          })
-
-          const { secret, expTime } = config.JWT
-
-          const token = sign(
-            {
-              id: refreshToken.user_id
-            },
-            secret,
-            { expiresIn: expTime }
-          )
-
-          res.status(200).json({
-            token,
-            refreshToken: newRefreshToken
-          })
-        } else {
-          res.status(401).json({ message: 'refresh token expired' })
-        }
-      } else {
-        res.status(404).json({ message: 'refresh token not found' })
       }
     } else {
       res.status(412).json({ message: 'missing arguments' })

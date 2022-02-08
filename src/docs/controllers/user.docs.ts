@@ -27,30 +27,10 @@ export default {
               properties: {
                 token: {
                   'type': 'string'
-                },
-                refreshToken: {
-                  id: {
-                    type: 'number'
-                  },
-                  uuid: {
-                    type: 'string'
-                  },
-                  expiresIn: {
-                    type: 'string'
-                  },
-                  user_id: {
-                    type: 'number'
-                  }
                 }
               },
               example: {
-                token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0ODkwIiwibmFtZSI6IkpvZ2ZnZmhuIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.GARIyo2w6ZcuniX26kpmMgCmBTp5TX_6tjm2tFMkbRU',
-                refreshToken: {
-                  id: 12,
-                  uuid: '84a18578-efe1-4741-a413-b4a03abaedfb',
-                  expiresIn: '1634244248033',
-                  user_id: 56
-                }
+                token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0ODkwIiwibmFtZSI6IkpvZ2ZnZmhuIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.GARIyo2w6ZcuniX26kpmMgCmBTp5TX_6tjm2tFMkbRU'
               }
             }
           }
@@ -106,106 +86,6 @@ export default {
       }
     }
   },
-  refreshToken: {
-    summary: 'Renew refresh token',
-    parameters: [
-      {
-        in: 'query',
-        name: 'id',
-        required: 'true',
-        type: 'string',
-        format: 'uuid',
-        description: 'id'
-      }
-    ],
-    responses: {
-      '200': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                token: {
-                  'type': 'string'
-                },
-                refreshToken: {
-                  id: {
-                    type: 'number'
-                  },
-                  uuid: {
-                    type: 'string'
-                  },
-                  expiresIn: {
-                    type: 'string'
-                  },
-                  user_id: {
-                    type: 'number'
-                  }
-                }
-              },
-              example: {
-                token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0ODkwIiwibmFtZSI6IkpvZ2ZnZmhuIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.GARIyo2w6ZcuniX26kpmMgCmBTp5TX_6tjm2tFMkbRU',
-                refreshToken: {
-                  id: 12,
-                  uuid: '84a18578-efe1-4741-a413-b4a03abaedfb',
-                  expiresIn: '1634244248033',
-                  user_id: 56
-                }
-              }
-            }
-          }
-        }
-      },
-      '412': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: 'missing arguments'
-              }
-            }
-          }
-        }
-      },
-      '404': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: 'refresh token not found'
-              }
-            }
-          }
-        }
-      },
-      '401': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: 'refresh token expired'
-              }
-            }
-          }
-        }
-      },
-      '500': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: '<<error message>>'
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   forgotPassword: {
     summary: 'Request a link to reset the password',
     parameters: [
@@ -237,18 +117,6 @@ export default {
               type: 'string',
               example: {
                 message: 'missing arguments'
-              }
-            }
-          }
-        }
-      },
-      '404': {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-              example: {
-                message: 'refresh token not found'
               }
             }
           }
