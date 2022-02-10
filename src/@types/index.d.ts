@@ -1,7 +1,5 @@
 import { Request } from 'express'
 
-import { lab, users_on_labs } from '@prisma/client'
-
 interface CustomRequest extends Request {
   userId: string
   user: {
@@ -13,8 +11,6 @@ interface CustomRequest extends Request {
     created_at: Date,
     updated_at: Date
   } | undefined
-  labs: lab[] | undefined
-  usersOnLabs: users_on_labs[] | undefined
 }
 
 export {
