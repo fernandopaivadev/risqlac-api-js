@@ -22,7 +22,6 @@ export default {
           }
         }).catch((err: Error) => {
           next(err)
-          return
         })
       } else {
         user = await prisma.user.findFirst({
@@ -31,7 +30,6 @@ export default {
           }
         }).catch((err: Error) => {
           next(err)
-          return
         })
       }
 
@@ -78,7 +76,6 @@ export default {
           }
         }).catch((err: Error) => {
           next(err)
-          return
         })
       } else {
         user = await prisma.user.findFirst({
@@ -87,7 +84,6 @@ export default {
           }
         }).catch((err: Error) => {
           next(err)
-          return
         })
       }
 
@@ -162,7 +158,6 @@ export default {
         }
       }).catch((err: Error) => {
         next(err)
-        return
       })
 
 
@@ -181,7 +176,6 @@ export default {
           }
         }).catch((err: Error) => {
           next(err)
-          return
         })
 
         res.status(200).json({ message: 'password changed' })
@@ -206,7 +200,6 @@ export default {
         }
       }).catch((err: Error) => {
         next(err)
-        return
       })
 
       if (users) {
@@ -243,7 +236,6 @@ export default {
       }
     }).catch((err: Error) => {
       next(err)
-      return
     })
 
     if (targetUser) {
@@ -279,7 +271,6 @@ export default {
       data: newUser
     }).catch((err: Error) => {
       next(err)
-      return
     })
 
     res.status(201).json({ message: 'user created' })
@@ -298,7 +289,6 @@ export default {
       }
     }).catch((err: Error) => {
       next(err)
-      return
     })
 
     if (targetUser) {
@@ -326,7 +316,6 @@ export default {
         data: newUser
       }).catch((err: Error) => {
         next(err)
-        return
       })
 
       res.status(200).json({ message: 'user updated' })
@@ -348,7 +337,6 @@ export default {
       }
     }).catch((err: Error) => {
       next(err)
-      return
     })
 
     if (targetUser) {
@@ -358,7 +346,6 @@ export default {
         }
       }).catch((err: Error) => {
         next(err)
-        return
       })
 
       res.status(200).json({ message: 'user deleted' })

@@ -25,7 +25,6 @@ export default async (
       }
     }).catch((err: Error) => {
       next(err)
-      return
     })
 
     if (user) {

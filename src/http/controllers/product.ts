@@ -16,7 +16,6 @@ export default {
         data: body
       }).catch((err: Error) => {
         next(err)
-        return
       })
 
       res.status(201).json({ message: 'product created' })
@@ -26,11 +25,16 @@ export default {
   },
 
   list: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
-    const products = await prisma.product.findMany()
-      .catch((err: Error) => {
-        next(err)
-        return
-      })
+    const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        class: true,
+        lab: true
+      }
+    }).catch((err: Error) => {
+      next(err)
+    })
 
     res.status(200).json({ products })
   },
@@ -45,7 +49,6 @@ export default {
         }
       }).catch((err: Error) => {
         next(err)
-        return
       })
 
       if (product) {
@@ -76,7 +79,6 @@ export default {
           data: body
         }).catch((err: Error) => {
           next(err)
-          return
         })
 
         if (product) {
@@ -105,7 +107,6 @@ export default {
           }
         }).catch((err: Error) => {
           next(err)
-          return
         })
 
         if (product) {
