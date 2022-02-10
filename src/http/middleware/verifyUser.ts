@@ -24,12 +24,30 @@ export default async (
         updated_at: true
       }
     }).catch((err: Error) => {
-      next(err)
+      res.status(500).json({ error: err })
     })
 
     if (user) {
+      const labs = await prisma.lab.findMany({
+        where: {
+          users: {
+            some: {
+              user_id: user.id
+            }
+          }
+        }
+      }).catch((err: Error) => {
+        res.status(500).json({ error: err })
+      })
+
       req.user = user
-      next()
+
+      if (labs) {
+        req.labs = labs
+        next()
+      } else {
+        res.status(500).json({ error: new Error('labs not found') })
+      }
     } else {
       res.status(404).json({ message: 'user not found' })
     }
