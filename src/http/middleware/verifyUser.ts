@@ -40,13 +40,20 @@ export default async (
         res.status(500).json({ error: err })
       })
 
+      const usersOnLabs = await prisma.users_on_labs.findMany({
+        where: {
+          user_id: user.id
+        }
+      })
+
       req.user = user
 
-      if (labs) {
+      if (labs && usersOnLabs) {
         req.labs = labs
+        req.usersOnLabs = usersOnLabs
         next()
       } else {
-        res.status(500).json({ error: new Error('labs not found') })
+        res.status(404).json({ error: new Error('labs not found') })
       }
     } else {
       res.status(404).json({ message: 'user not found' })

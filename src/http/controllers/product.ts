@@ -25,18 +25,30 @@ export default {
   },
 
   list: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
-    const products = await prisma.product.findMany({
-      select: {
-        id: true,
-        name: true,
-        class: true,
-        lab: true
-      }
-    }).catch((err: Error) => {
-      next(err)
-    })
+    const id = req.query?.id
 
-    res.status(200).json({ products })
+    if (id) {
+      const products = await prisma.product.findMany({
+        where: {
+          lab_id: String(id)
+        },
+        select: {
+          id: true,
+          name: true,
+          class: true
+        }
+      }).catch((err: Error) => {
+        next(err)
+      })
+
+      if (products) {
+        res.status(200).json({ products })
+      } else {
+        res.status(404).json({ message: 'products not found' })
+      }
+    } else {
+      res.status(412).json({ message: 'missing arguments' })
+    }
   },
 
   data: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
