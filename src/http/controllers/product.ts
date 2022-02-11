@@ -76,61 +76,101 @@ export default {
   update: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
     const { user } = req
 
-    if (user?.is_admin) {
-      const id = req.body?.id
+    const id = req.body?.id
 
-      if (id) {
-        const body = {
-          ...req.body
+    if (id) {
+      const body = {
+        ...req.body
+      }
+
+      const product = await prisma.product.findUnique({
+        where: {
+          id: String(id)
         }
+      }).catch((err: Error) => {
+        next(err)
+      })
 
-        const product = await prisma.product.update({
+      if (product) {
+        const userHasPermission = await prisma.users_on_labs.findFirst({
           where: {
-            id: String(id)
-          },
-          data: body
+            AND: {
+              user_id: user?.id,
+              lab_id: String(product.lab_id),
+              access_level: 'admin'
+            }
+          }
         }).catch((err: Error) => {
           next(err)
         })
 
-        if (product) {
-          res.status(200).json({ product })
+        if (userHasPermission) {
+          await prisma.product.update({
+            where: {
+              id: String(id)
+            },
+            data: body
+          }).catch((err: Error) => {
+            next(err)
+          })
+
+          res.status(200).json({ message: 'product updated' })
         } else {
-          res.status(404).json({ message: 'product not found' })
+          res.status(403).json({ message: 'admin access only' })
         }
       } else {
-        res.status(412).json({ message: 'missing arguments' })
+        res.status(404).json({ message: 'product not found' })
       }
     } else {
-      res.status(403).json({ message: 'admin access only' })
+      res.status(412).json({ message: 'missing arguments' })
     }
   },
 
   delete: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
     const { user } = req
 
-    if (user?.is_admin) {
-      const id = req.query?.id
+    const id = req.query?.id
 
-      if (id) {
-        const product = await prisma.product.delete({
+    if (id) {
+      const product = await prisma.product.findUnique({
+        where: {
+          id: String(id)
+        }
+      }).catch((err: Error) => {
+        next(err)
+      })
+
+      if (product) {
+        const userHasPermission = await prisma.users_on_labs.findFirst({
           where: {
-            id: String(id)
+            AND: {
+              user_id: user?.id,
+              lab_id: String(product.lab_id),
+              access_level: 'admin'
+            }
           }
         }).catch((err: Error) => {
           next(err)
         })
 
-        if (product) {
-          res.status(200).json({ product })
+        if (userHasPermission) {
+          await prisma.product.delete({
+            where: {
+              id: String(id)
+            }
+          }).catch((err: Error) => {
+            next(err)
+          })
+
+          res.status(200).json({ message: 'product deleted' })
         } else {
-          res.status(404).json({ message: 'product not found' })
+          res.status(403).json({ message: 'admin access only' })
         }
       } else {
-        res.status(412).json({ message: 'missing arguments' })
+        res.status(404).json({ message: 'product not found' })
       }
     } else {
-      res.status(403).json({ message: 'admin access only' })
+      res.status(412).json({ message: 'missing arguments' })
     }
   }
 }
