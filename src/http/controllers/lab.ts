@@ -35,8 +35,6 @@ export default {
     } else {
       res.status(404).json({ message: 'labs not found' })
     }
-
-    res.status(200).json({ labs })
   },
 
   update: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {

@@ -2,6 +2,7 @@ import { Router, Response, NextFunction } from 'express'
 
 import { CustomRequest } from '@types'
 
+import lab from './controllers/lab'
 import product from './controllers/product'
 import user from './controllers/user'
 import errorHandler from './middleware/errorHandler'
@@ -12,7 +13,8 @@ const controllers: { [key: string]: {
   [key: string]: (req: CustomRequest, res: Response, next: NextFunction) => Promise<void>
 }} = {
   user,
-  product
+  product,
+  lab
 }
 
 const authNotRequired = [
