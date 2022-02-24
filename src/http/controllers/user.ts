@@ -232,7 +232,8 @@ export default {
         phone: true,
         created_at: true,
         updated_at: true,
-        hashed_password: false
+        hashed_password: false,
+        labs: true
       }
     }).catch((err: Error) => {
       next(err)
