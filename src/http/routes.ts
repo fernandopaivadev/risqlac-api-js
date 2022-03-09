@@ -5,6 +5,7 @@ import { CustomRequest } from '@types'
 import lab from './controllers/lab'
 import product from './controllers/product'
 import user from './controllers/user'
+import usersOnLabs from './controllers/usersOnLabs'
 import errorHandler from './middleware/errorHandler'
 import verifyToken from './middleware/verifyToken'
 import verifyUser from './middleware/verifyUser'
@@ -14,7 +15,8 @@ const controllers: { [key: string]: {
 }} = {
   user,
   product,
-  lab
+  lab,
+  usersOnLabs
 }
 
 const authNotRequired = [

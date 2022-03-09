@@ -20,6 +20,7 @@ export default async (
         name: true,
         username: true,
         phone: true,
+        labs: true,
         created_at: true,
         updated_at: true
       }

@@ -5,33 +5,24 @@ import { createTransport } from 'nodemailer'
 
 import config from '@config'
 import { prisma } from '@database'
-import { user } from '@prisma/client'
 import { CustomRequest } from '@types'
 
 export default {
   auth: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    let user: user | null | void = null
     const username = req.query?.username
     const password = req.query?.password
 
     if (username && password) {
-      if (String(username).split('').includes('@')) {
-        user = await prisma.user.findFirst({
-          where: {
-            email: String(username)
-          }
-        }).catch((err: Error) => {
-          next(err)
-        })
-      } else {
-        user = await prisma.user.findFirst({
-          where: {
-            username: String(username)
-          }
-        }).catch((err: Error) => {
-          next(err)
-        })
-      }
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: String(username) },
+            { username: String(username) }
+          ]
+        }
+      }).catch((err: Error) => {
+        next(err)
+      })
 
       if (user) {
         const isValid = await compare(
@@ -65,27 +56,19 @@ export default {
   },
 
   forgotPassword: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    let user: user | null | void = null
     const username = req.query?.username
 
     if (username) {
-      if (String(username).split('').includes('@')) {
-        user = await prisma.user.findFirst({
-          where: {
-            email: String(username)
-          }
-        }).catch((err: Error) => {
-          next(err)
-        })
-      } else {
-        user = await prisma.user.findFirst({
-          where: {
-            username: String(username)
-          }
-        }).catch((err: Error) => {
-          next(err)
-        })
-      }
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: String(username) },
+            { username: String(username) }
+          ]
+        }
+      }).catch((err: Error) => {
+        next(err)
+      })
 
       if (user) {
         const { host, email, password } = config.SUPPORT_EMAIL
@@ -120,32 +103,29 @@ export default {
           from: email,
           to: user.email,
           subject: 'Tech Amazon - Recuperação de Senha',
-          text: `Clique no link abaixo para redefinir sua senha:\n\n${resetPasswordLink
+          text: `Clique no link abaixo para redefinir sua senha:\n\n${
+            resetPasswordLink
           }`,
-          html: `Clique no link abaixo para redefinir sua senha:\n\n${resetPasswordLink
+          html: `Clique no link abaixo para redefinir sua senha:\n\n${
+            resetPasswordLink
           }`
         })
 
         res.status(200).json({ message: 'recovery email sent' })
       } else {
-        res.status(412).json({ message: 'missing arguments' })
+        res.status(404).json({ message: 'user not found' })
       }
-    } else {
-      res.status(404).json({ message: 'user not found' })
+    } 
+    else {
+      res.status(412).json({ message: 'missing arguments' })
     }
   },
 
   resetPassword: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    let token: string | undefined | null
-    let secret: string | undefined | null
+    const tokenFromBody = req.body?.token
 
-    if (req.body.token) {
-      token = req.body.token
-      secret = config.RECOVERY_JWT.secret
-    } else {
-      token = req.headers.authorization?.split(' ')[1]
-      secret = config.JWT.secret
-    }
+    const token = tokenFromBody ? tokenFromBody : req.headers.authorization?.split(' ')[1]
+    const secret = tokenFromBody ? config.RECOVERY_JWT.secret : config.JWT.secret
 
     if (token) {
       const { password } = req.body
@@ -159,7 +139,6 @@ export default {
       }).catch((err: Error) => {
         next(err)
       })
-
 
       if (user) {
         const hashed_password = await hash(
@@ -216,39 +195,43 @@ export default {
     const { user } = req
     const targetUserId = req.query?.id
 
-    const targetUser = await prisma.user.findUnique({
-      where: {
-        id: user?.is_admin && targetUserId ?
-          String(targetUserId)
-          :
-          user?.id
-      },
-      select: {
-        id: true,
-        is_admin: true,
-        username: true,
-        name: true,
-        email: true,
-        phone: true,
-        created_at: true,
-        updated_at: true,
-        hashed_password: false,
-        labs: true
-      }
-    }).catch((err: Error) => {
-      next(err)
-    })
-
-    if (targetUser) {
-      res.status(200).json({
-        user: targetUser
+    if (targetUserId) {
+      const targetUser = await prisma.user.findUnique({
+        where: {
+          id: user?.is_admin && targetUserId ?
+            String(targetUserId)
+            :
+            user?.id
+        },
+        select: {
+          id: true,
+          is_admin: true,
+          username: true,
+          name: true,
+          email: true,
+          phone: true,
+          created_at: true,
+          updated_at: true,
+          hashed_password: false
+        }
+      }).catch((err: Error) => {
+        next(err)
       })
+      
+      if (targetUser) {
+        res.status(200).json({
+          user: targetUser
+        })
+      } else {
+        res.status(404).json({ message: 'user not found' })
+      }
     } else {
-      res.status(404).json({ message: 'user not found' })
+      res.status(412).json({ message: 'missing arguments' })
     }
   },
 
   create: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+    const { user } = req
     const body = {
       ...req.body
     }
@@ -258,18 +241,14 @@ export default {
       Math.floor(Math.random() * 10 + 10)
     )
 
-    const newUser = {
-      ...body
-    }
+    delete body.password
 
-    delete newUser.password
-
-    if (newUser.is_admin && !req.user?.is_admin) {
-      delete newUser.is_admin
+    if (body.is_admin && !user?.is_admin) {
+      delete body.is_admin
     }
 
     await prisma.user.create({
-      data: newUser
+      data: body
     }).catch((err: Error) => {
       next(err)
     })
@@ -297,24 +276,22 @@ export default {
         ...req.body
       }
 
-      const newUser = {
-        id: body.id,
-        username: body.username,
-        is_admin: body.is_admin,
-        email: body.email,
-        phone: body.phone,
-        updated_at: new Date()
-      }
-
-      if (!req.user?.is_admin) {
-        delete newUser.is_admin
+      if (!user?.is_admin) {
+        delete body.is_admin
       }
 
       await prisma.user.update({
         where: {
           id: targetUser.id
         },
-        data: newUser
+        data: {
+          id: body.id,
+          username: body.username,
+          is_admin: body.is_admin,
+          email: body.email,
+          phone: body.phone,
+          updated_at: new Date()
+        }
       }).catch((err: Error) => {
         next(err)
       })

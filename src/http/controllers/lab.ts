@@ -1,6 +1,7 @@
 import { NextFunction, Response } from 'express'
 
 import { prisma } from '@database'
+import { lab } from '@prisma/client'
 import { CustomRequest } from '@types'
 
 export default {
@@ -25,10 +26,28 @@ export default {
   },
 
   list: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
-    const labs = await prisma.lab.findMany()
-      .catch((err: Error) => {
+    const id = req.query?.id
+
+    let labs: lab[] | null | void = null
+
+    if (id) {
+      labs = await prisma.lab.findMany({
+        where: {
+          users: {
+            every: {
+              user_id: String(id)
+            }
+          }
+        }
+      }).catch((err: Error) => {
         next(err)
       })
+    } else {
+      labs = await prisma.lab.findMany()
+        .catch((err: Error) => {
+          next(err)
+        })
+    }
 
     if (labs) {
       res.status(200).json({ labs })
