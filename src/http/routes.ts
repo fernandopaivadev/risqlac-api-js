@@ -2,8 +2,8 @@ import { Router, Response, NextFunction } from 'express'
 
 import { CustomRequest } from '@types'
 
+import lab from './controllers/lab'
 import product from './controllers/product'
-import symbol from './controllers/symbol'
 import user from './controllers/user'
 import errorHandler from './middleware/errorHandler'
 import verifyToken from './middleware/verifyToken'
@@ -14,13 +14,12 @@ const controllers: { [key: string]: {
 }} = {
   user,
   product,
-  symbol
+  lab
 }
 
 const authNotRequired = [
   '/user/auth',
   '/user/create',
-  '/user/refresh-token',
   '/user/forgot-password',
   '/user/reset-password'
 ]

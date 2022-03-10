@@ -5,9 +5,6 @@ const config: {
   DATABASE_URL: string
   JWT: { secret: string, expTime: string }
   RECOVERY_JWT: { secret: string, expTime: string }
-  REFRESH_TOKEN: {
-    expTime: number
-  }
   SUPPORT_EMAIL: {
     host: string
     email: string

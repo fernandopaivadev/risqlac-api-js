@@ -10,42 +10,58 @@ datasource db {
 model user {
   id              String          @id @default(uuid()) @db.VarChar(255)
   username        String          @db.VarChar(32)
-  is_admin        Boolean         @default(false)
   name            String          @db.VarChar(255)
   email           String          @db.VarChar(64)
   phone           String          @db.VarChar(64)
   hashed_password String          @db.VarChar(255)
   created_at      DateTime        @default(now()) @db.Timestamp(6)
   updated_at      DateTime        @default(now()) @db.Timestamp(6)
-  product         product[]
-  refresh_token   refresh_token[]
+  is_admin        Boolean         @default(false)
+  labs            users_on_labs[]
 }
 
-model refresh_token {
-  id         String   @id @default(uuid()) @db.VarChar(255)
-  expiresIn  String   @db.VarChar(32)
-  user_id    String   @db.VarChar(255)
-  created_at DateTime @default(now()) @db.Timestamp(6)
-  updated_at DateTime @default(now()) @db.Timestamp(6)
-  user       user     @relation(fields: [user_id], references: [id])
+model lab {
+  id        String          @id @default(uuid()) @db.VarChar(255)
+  name      String
+  location  String?
+  institute String?
+  products  product[]
+  users     users_on_labs[]
+}
+
+model users_on_labs {
+  user_id      String            @db.VarChar(255)
+  lab_id       String            @db.VarChar(255)
+  assigned_at  DateTime          @default(now()) @db.Timestamp(6)
+  assigned_by  String            @db.VarChar(255)
+  access_level user_access_level
+  lab          lab               @relation(fields: [lab_id], references: [id])
+  user         user              @relation(fields: [user_id], references: [id])
+
+  @@id([user_id, lab_id])
 }
 
 model product {
   id              String   @id @default(uuid()) @db.VarChar(255)
-  name            String
   synonym         String
   class           String
   subclass        String
   storage         String
   incompatibility String
   precautions     String
-  quantity        String?
-  due_date        String?
-  batch           String?
-  location        String?
-  user_id         String   @db.VarChar(255)
   created_at      DateTime @default(now()) @db.Timestamp(6)
   updated_at      DateTime @default(now()) @db.Timestamp(6)
   symbols         String   @default("[]")
-  user            user     @relation(fields: [user_id], references: [id])
+  name            String
+  batch           String?
+  due_date        String?
+  location        String?
+  quantity        String?
+  lab_id          String?  @db.VarChar(255)
+  lab             lab?     @relation(fields: [lab_id], references: [id])
+}
+
+enum user_access_level {
+  admin
+  student
 }
