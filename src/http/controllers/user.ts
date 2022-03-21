@@ -5,6 +5,7 @@ import { createTransport } from 'nodemailer'
 
 import config from '@config'
 import { prisma } from '@database'
+import { user_access_level } from '@prisma/client'
 import { CustomRequest } from '@types'
 
 export default {
@@ -195,7 +196,7 @@ export default {
     const { user } = req
     const targetUserId = req.query?.id
 
-    if (targetUserId) {
+    if (user?.is_admin || user?.id === String(targetUserId)) {
       const targetUser = await prisma.user.findUnique({
         where: {
           id: user?.is_admin && targetUserId ?
@@ -226,7 +227,7 @@ export default {
         res.status(404).json({ message: 'user not found' })
       }
     } else {
-      res.status(412).json({ message: 'missing arguments' })
+      res.status(403).json({ message: 'admin access only' })
     }
   },
 
@@ -286,6 +287,7 @@ export default {
         },
         data: {
           id: body.id,
+          name: body.name,
           username: body.username,
           is_admin: body.is_admin,
           email: body.email,
@@ -297,6 +299,105 @@ export default {
       })
 
       res.status(200).json({ message: 'user updated' })
+    } else {
+      res.status(404).json({ message: 'user not found' })
+    }
+  },
+
+  addLab: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+    const { user } = req
+    const targetUserId = req.query?.id
+    const labId = req.query?.lab_id
+    const accessLevel = req.query?.access_level
+
+    const targetUser = await prisma.user.findUnique({
+      where: {
+        id: user?.is_admin && targetUserId ?
+          String(targetUserId)
+          :
+          user?.id
+      }
+    }).catch((err: Error) => {
+      next(err)
+    })
+
+    if (targetUser) {
+      const body = {
+        ...req.body
+      }
+
+      if (!user?.is_admin) {
+        delete body.is_admin
+      }
+
+      await prisma.user.update({
+        where: {
+          id: targetUser.id
+        },
+        data: {
+          labs: {
+            create: {
+              lab_id: String(labId),
+              assigned_by: String(user?.id),
+              access_level: accessLevel as user_access_level
+            }
+          },
+          ...targetUser,
+          updated_at: new Date()
+        }
+      }).catch((err: Error) => {
+        next(err)
+      })
+
+      res.status(200).json({ message: 'user subscribed to lab' })
+    } else {
+      res.status(404).json({ message: 'user not found' })
+    }
+  },
+
+  removeLab: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+    const { user } = req
+    const targetUserId = req.query?.id
+    const labId = req.query?.lab_id
+
+    const targetUser = await prisma.user.findUnique({
+      where: {
+        id: user?.is_admin && targetUserId ?
+          String(targetUserId)
+          :
+          user?.id
+      }
+    }).catch((err: Error) => {
+      next(err)
+    })
+
+    if (targetUser) {
+      const body = {
+        ...req.body
+      }
+
+      if (!user?.is_admin) {
+        delete body.is_admin
+      }
+
+      await prisma.user.update({
+        where: {
+          id: targetUser.id
+        },
+        data: {
+          labs: {
+            deleteMany: {
+              lab_id: String(labId)
+            }
+          },
+          ...targetUser,
+          updated_at: new Date()
+        }
+      }).catch((err: Error) => {
+        next(err)
+      })
+
+      res.status(200).json({ message: 'user subscribed to lab' })
     } else {
       res.status(404).json({ message: 'user not found' })
     }
