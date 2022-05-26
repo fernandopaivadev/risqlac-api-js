@@ -1,15 +1,13 @@
 import { hash, compare } from 'bcrypt'
-import { NextFunction, Request, Response } from 'express'
 import { sign, verify } from 'jsonwebtoken'
 import { createTransport } from 'nodemailer'
 
 import config from '@config'
 import { prisma } from '@database'
-import { user_access_level } from '@prisma/client'
-import { CustomRequest } from '@types'
+import { App } from '@types'
 
 export default {
-  auth: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  login: async (req, res, next) => {
     const username = req.query?.username
     const password = req.query?.password
 
@@ -22,7 +20,7 @@ export default {
           ]
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       if (user) {
@@ -56,7 +54,7 @@ export default {
     }
   },
 
-  forgotPassword: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  forgotPassword: async (req, res, next) => {
     const username = req.query?.username
 
     if (username) {
@@ -68,7 +66,7 @@ export default {
           ]
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       if (user) {
@@ -116,13 +114,13 @@ export default {
       } else {
         res.status(404).json({ message: 'user not found' })
       }
-    } 
+    }
     else {
       res.status(412).json({ message: 'missing arguments' })
     }
   },
 
-  resetPassword: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  resetPassword: async (req, res, next) => {
     const tokenFromBody = req.body?.token
 
     const token = tokenFromBody ? tokenFromBody : req.headers.authorization?.split(' ')[1]
@@ -138,7 +136,7 @@ export default {
           id
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       if (user) {
@@ -155,7 +153,7 @@ export default {
             hashed_password
           }
         }).catch((err: Error) => {
-          next(err)
+          next({ err })
         })
 
         res.status(200).json({ message: 'password changed' })
@@ -167,7 +165,7 @@ export default {
     }
   },
 
-  list: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  list: async (req, res, next) => {
     const { user } = req
 
     if (user?.is_admin) {
@@ -179,7 +177,7 @@ export default {
           is_admin: true
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       if (users) {
@@ -192,7 +190,7 @@ export default {
     }
   },
 
-  data: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  data: async (req, res, next) => {
     const { user } = req
     const targetUserId = req.query?.id
 
@@ -216,9 +214,9 @@ export default {
           hashed_password: false
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
-      
+
       if (targetUser) {
         res.status(200).json({
           user: targetUser
@@ -231,7 +229,7 @@ export default {
     }
   },
 
-  create: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  create: async (req, res, next) => {
     const { user } = req
     const body = {
       ...req.body
@@ -251,13 +249,13 @@ export default {
     await prisma.user.create({
       data: body
     }).catch((err: Error) => {
-      next(err)
+      next({ err })
     })
 
     res.status(201).json({ message: 'user created' })
   },
 
-  update: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  update: async (req, res, next) => {
     const { user } = req
     const targetUserId = req.body?.id
 
@@ -269,7 +267,7 @@ export default {
           user?.id
       }
     }).catch((err: Error) => {
-      next(err)
+      next({ err })
     })
 
     if (targetUser) {
@@ -295,7 +293,7 @@ export default {
           updated_at: new Date()
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       res.status(200).json({ message: 'user updated' })
@@ -304,106 +302,7 @@ export default {
     }
   },
 
-  addLab: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
-    const { user } = req
-    const targetUserId = req.query?.id
-    const labId = req.query?.lab_id
-    const accessLevel = req.query?.access_level
-
-    const targetUser = await prisma.user.findUnique({
-      where: {
-        id: user?.is_admin && targetUserId ?
-          String(targetUserId)
-          :
-          user?.id
-      }
-    }).catch((err: Error) => {
-      next(err)
-    })
-
-    if (targetUser) {
-      const body = {
-        ...req.body
-      }
-
-      if (!user?.is_admin) {
-        delete body.is_admin
-      }
-
-      await prisma.user.update({
-        where: {
-          id: targetUser.id
-        },
-        data: {
-          labs: {
-            create: {
-              lab_id: String(labId),
-              assigned_by: String(user?.id),
-              access_level: accessLevel as user_access_level
-            }
-          },
-          ...targetUser,
-          updated_at: new Date()
-        }
-      }).catch((err: Error) => {
-        next(err)
-      })
-
-      res.status(200).json({ message: 'user subscribed to lab' })
-    } else {
-      res.status(404).json({ message: 'user not found' })
-    }
-  },
-
-  removeLab: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
-    const { user } = req
-    const targetUserId = req.query?.id
-    const labId = req.query?.lab_id
-
-    const targetUser = await prisma.user.findUnique({
-      where: {
-        id: user?.is_admin && targetUserId ?
-          String(targetUserId)
-          :
-          user?.id
-      }
-    }).catch((err: Error) => {
-      next(err)
-    })
-
-    if (targetUser) {
-      const body = {
-        ...req.body
-      }
-
-      if (!user?.is_admin) {
-        delete body.is_admin
-      }
-
-      await prisma.user.update({
-        where: {
-          id: targetUser.id
-        },
-        data: {
-          labs: {
-            deleteMany: {
-              lab_id: String(labId)
-            }
-          },
-          ...targetUser,
-          updated_at: new Date()
-        }
-      }).catch((err: Error) => {
-        next(err)
-      })
-
-      res.status(200).json({ message: 'user subscribed to lab' })
-    } else {
-      res.status(404).json({ message: 'user not found' })
-    }
-  },
-
-  delete: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  delete: async (req, res, next) => {
     const { user } = req
     const targetUserId = req.body?.id
 
@@ -415,7 +314,7 @@ export default {
           user?.id
       }
     }).catch((err: Error) => {
-      next(err)
+      next({ err })
     })
 
     if (targetUser) {
@@ -424,7 +323,7 @@ export default {
           id: targetUser.id
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       res.status(200).json({ message: 'user deleted' })
@@ -432,4 +331,4 @@ export default {
       res.status(404).json({ message: 'user not found' })
     }
   }
-}
+} as App.Controllers.Users

@@ -20,6 +20,9 @@
       "@database": [
         "./src/database/index.ts"
       ],
+      "@shared": [
+        "./src/shared/index.ts"
+      ],
       "@config": [
         "./src/config/index.ts"
       ]

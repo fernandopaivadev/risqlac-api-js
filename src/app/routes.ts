@@ -1,20 +1,16 @@
-import { Router, Response, NextFunction } from 'express'
+import { Router } from 'express'
 
-import { CustomRequest } from '@types'
-
-import lab from './controllers/lab'
 import product from './controllers/product'
 import user from './controllers/user'
-import errorHandler from './middleware/errorHandler'
+import sendResponse from './middleware/sendResponse'
 import verifyToken from './middleware/verifyToken'
 import verifyUser from './middleware/verifyUser'
 
 const controllers: { [key: string]: {
-  [key: string]: (req: CustomRequest, res: Response, next: NextFunction) => Promise<void>
+  [key: string]: any
 }} = {
   user,
-  product,
-  lab
+  product
 }
 
 const authNotRequired = [
@@ -38,14 +34,8 @@ Object.keys(controllers).forEach((controllerName: string) => {
         return 'delete'
       case 'resetPassword':
         return 'patch'
-      case 'firstUser':
-        return 'post'
       case 'generate':
         return 'post'
-      case 'addLab':
-        return 'put'
-      case 'removeLab':
-        return 'put'
       default:
         return 'get'
       }
@@ -67,7 +57,7 @@ Object.keys(controllers).forEach((controllerName: string) => {
         routes[method](
           path,
           controller,
-          errorHandler
+          sendResponse
         )
       } else {
         routes[method](
@@ -75,7 +65,7 @@ Object.keys(controllers).forEach((controllerName: string) => {
           verifyToken,
           verifyUser,
           controller,
-          errorHandler
+          sendResponse
         )
       }
     }

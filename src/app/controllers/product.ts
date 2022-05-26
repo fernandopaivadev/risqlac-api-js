@@ -1,10 +1,8 @@
-import { NextFunction, Response } from 'express'
-
 import { prisma } from '@database'
-import { CustomRequest } from '@types'
+import { App } from '@types'
 
 export default {
-  create: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  create: async (req, res, next) => {
     const { user } = req
 
     if (user?.is_admin) {
@@ -15,7 +13,7 @@ export default {
       await prisma.product.create({
         data: body
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       res.status(201).json({ message: 'product created' })
@@ -24,21 +22,18 @@ export default {
     }
   },
 
-  list: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  list: async (req, res, next) => {
     const id = req.query?.id
 
     if (id) {
       const products = await prisma.product.findMany({
-        where: {
-          lab_id: String(id)
-        },
         select: {
           id: true,
           name: true,
           class: true
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       if (products) {
@@ -51,7 +46,7 @@ export default {
     }
   },
 
-  data: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  data: async (req, res, next) => {
     const id = req.query?.id
 
     if (id) {
@@ -60,7 +55,7 @@ export default {
           id: String(id)
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       if (product) {
@@ -73,7 +68,7 @@ export default {
     }
   },
 
-  update: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  update: async (req, res, next) => {
     const { user } = req
 
     const id = req.body?.id
@@ -88,7 +83,7 @@ export default {
           id: String(id)
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       if (product) {
@@ -101,7 +96,7 @@ export default {
             }
           }
         }).catch((err: Error) => {
-          next(err)
+          next({ err })
         })
 
         if (userHasPermission) {
@@ -111,7 +106,7 @@ export default {
             },
             data: body
           }).catch((err: Error) => {
-            next(err)
+            next({ err })
           })
 
           res.status(200).json({ message: 'product updated' })
@@ -126,7 +121,7 @@ export default {
     }
   },
 
-  delete: async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  delete: async (req, res, next) => {
     const { user } = req
 
     const id = req.query?.id
@@ -137,7 +132,7 @@ export default {
           id: String(id)
         }
       }).catch((err: Error) => {
-        next(err)
+        next({ err })
       })
 
       if (product) {
@@ -150,7 +145,7 @@ export default {
             }
           }
         }).catch((err: Error) => {
-          next(err)
+          next({ err })
         })
 
         if (userHasPermission) {
@@ -159,7 +154,7 @@ export default {
               id: String(id)
             }
           }).catch((err: Error) => {
-            next(err)
+            next({ err })
           })
 
           res.status(200).json({ message: 'product deleted' })
@@ -173,4 +168,4 @@ export default {
       res.status(412).json({ message: 'missing arguments' })
     }
   }
-}
+} as App.Controllers.Products
