@@ -3,7 +3,7 @@ import { stdout } from 'process'
 
 import config from '@config'
 
-import { app } from './http'
+import { app } from './app'
 
 console.clear()
 
