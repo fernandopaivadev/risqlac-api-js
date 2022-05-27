@@ -1,15 +1,15 @@
 import { hash, compare } from 'bcrypt'
 import { sign, verify } from 'jsonwebtoken'
-import { createTransport } from 'nodemailer'
 
 import config from '@config'
 import { prisma } from '@database'
+import { sendEmail } from '@shared'
 import { App } from '@types'
 
 export default {
   login: async (req, res, next) => {
-    const username = req.query?.username
-    const password = req.query?.password
+    const username = req.query.username
+    const password = req.query.password
 
     if (username && password) {
       const user = await prisma.user.findFirst({
@@ -37,25 +37,36 @@ export default {
               id: user.id
             },
             secret,
-            { expiresIn: expTime }
+            {
+              expiresIn: expTime
+            }
           )
 
-          res.status(200).json({
-            token
+          next({
+            status: 200,
+            data: {
+              token
+            }
           })
         } else {
-          res.status(401).json({ message: 'incorrect password' })
+          next({
+            status: 401
+          })
         }
       } else {
-        res.status(404).json({ message: 'user not found' })
+        next({
+          status: 404
+        })
       }
     } else {
-      res.status(412).json({ message: 'missing arguments' })
+      next({
+        status: 412
+      })
     }
   },
 
   forgotPassword: async (req, res, next) => {
-    const username = req.query?.username
+    const username = req.query.username
 
     if (username) {
       const user = await prisma.user.findFirst({
@@ -70,18 +81,6 @@ export default {
       })
 
       if (user) {
-        const { host, email, password } = config.SUPPORT_EMAIL
-
-        const transporter = createTransport({
-          host,
-          port: 587,
-          secure: false,
-          auth: {
-            user: email,
-            pass: password
-          }
-        })
-
         const { secret, expTime } = config.RECOVERY_JWT
 
         const token = sign(
@@ -94,241 +93,266 @@ export default {
 
         const resetPasswordLink = `${
           config.RESET_PASSWORD_LINK
-        }?token=${
+        }?token${
           token
         }`
 
-        await transporter.sendMail({
-          from: email,
+        const subject = 'TechAmazon - Recuperação de Senha'
+
+        await sendEmail({
+          from: config.EMAIL_CONFIG.auth.user,
           to: user.email,
-          subject: 'Tech Amazon - Recuperação de Senha',
-          text: `Clique no link abaixo para redefinir sua senha:\n\n${
+          subject,
+          template: 'resetPassword',
+          data: {
             resetPasswordLink
-          }`,
-          html: `Clique no link abaixo para redefinir sua senha:\n\n${
-            resetPasswordLink
-          }`
+          }
         })
 
-        res.status(200).json({ message: 'recovery email sent' })
+        next({
+          status: 202
+        })
       } else {
-        res.status(404).json({ message: 'user not found' })
+        next({
+          status: 404
+        })
       }
-    }
-    else {
-      res.status(412).json({ message: 'missing arguments' })
+    } else {
+      next({
+        status: 412
+      })
     }
   },
 
   resetPassword: async (req, res, next) => {
-    const tokenFromBody = req.body?.token
-
-    const token = tokenFromBody ? tokenFromBody : req.headers.authorization?.split(' ')[1]
+    const tokenFromBody = req.body.token
+    const token: string = tokenFromBody ? tokenFromBody : req.headers.authorization?.split(' ')[1]
     const secret = tokenFromBody ? config.RECOVERY_JWT.secret : config.JWT.secret
 
     if (token) {
-      const { password } = req.body
-      const payload: any = verify(token, secret)
-      const { id } = payload
-
-      const user = await prisma.user.findUnique({
-        where: {
-          id
-        }
-      }).catch((err: Error) => {
-        next({ err })
-      })
-
-      if (user) {
-        const hashed_password = await hash(
-          password,
-          Math.floor(Math.random() * 10 + 10)
-        )
-
-        await prisma.user.update({
-          where: {
-            id
-          },
-          data: {
-            hashed_password
-          }
-        }).catch((err: Error) => {
+      verify(token, secret, async (err, payload: any) => {
+        if (err) {
           next({ err })
-        })
+        } else {
+          const password = String(req.body.password)
+          const id = String(payload?.id)
 
-        res.status(200).json({ message: 'password changed' })
-      } else {
-        res.status(404).json({ message: 'user not found' })
-      }
+          if (password && id) {
+            if (password.length < 8) {
+              next({
+                err: new Error('invalid password')
+              })
+            }
+
+            const user = await prisma.user.findUnique({
+              where: {
+                id
+              }
+            }).catch((err: Error) => {
+              next({ err })
+            })
+
+            if (user) {
+              const hashed_password = await hash(
+                password,
+                Math.floor(Math.random() * 10 + 10)
+              )
+
+              if (await prisma.user.update({
+                where: {
+                  id: String(id)
+                },
+                data: {
+                  hashed_password
+                }
+              }).catch((err: Error) => {
+                next({
+                  err
+                })
+              })) {
+                next({
+                  status: 200
+                })
+              }
+            } else {
+              next({
+                status: 404
+              })
+            }
+          } else {
+            next({
+              status: 412
+            })
+          }
+        }
+      })
     } else {
-      res.status(400).json({ message: 'missing token' })
+      next({
+        status: 412
+      })
     }
   },
 
-  list: async (req, res, next) => {
+  list: async (req, res, next): Promise<void> => {
     const { user } = req
 
     if (user?.is_admin) {
       const users = await prisma.user.findMany({
         select: {
           id: true,
+          username: true,
           email: true,
-          name: true,
+          phone: true,
           is_admin: true
+        },
+        orderBy: {
+          is_admin: 'asc'
         }
       }).catch((err: Error) => {
         next({ err })
       })
 
       if (users) {
-        res.status(200).json({ users })
-      } else {
-        res.status(404).json({ message: 'users not found' })
-      }
-    } else {
-      res.status(403).json({ message: 'admin access only' })
-    }
-  },
-
-  data: async (req, res, next) => {
-    const { user } = req
-    const targetUserId = req.query?.id
-
-    if (user?.is_admin || user?.id === String(targetUserId)) {
-      const targetUser = await prisma.user.findUnique({
-        where: {
-          id: user?.is_admin && targetUserId ?
-            String(targetUserId)
-            :
-            user?.id
-        },
-        select: {
-          id: true,
-          is_admin: true,
-          username: true,
-          name: true,
-          email: true,
-          phone: true,
-          created_at: true,
-          updated_at: true,
-          hashed_password: false
-        }
-      }).catch((err: Error) => {
-        next({ err })
-      })
-
-      if (targetUser) {
-        res.status(200).json({
-          user: targetUser
+        next({
+          status: 200,
+          data: { users }
         })
       } else {
-        res.status(404).json({ message: 'user not found' })
+        next({
+          status: 404
+        })
       }
     } else {
-      res.status(403).json({ message: 'admin access only' })
+      next({
+        status: 403
+      })
     }
   },
 
-  create: async (req, res, next) => {
+  data: async (req, res, next): Promise<void> => {
+    const { user } = req
+    const id = req.query.id
+
+    const targetUser = await prisma.user.findUnique({
+      where: {
+        id: String(id && (user?.is_admin) ? id : user?.id)
+      },
+      select: {
+        id: true,
+        is_admin: true,
+        email: true,
+        username: true,
+        phone: true
+      }
+    }).catch((err: Error) => {
+      next({
+        err
+      })
+    })
+
+    if (targetUser) {
+      next({
+        status: 200,
+        data: {
+          user: targetUser
+        }
+      })
+    } else {
+      next({
+        status: 404
+      })
+    }
+  },
+
+  create: async (req, res, next): Promise<void> => {
     const { user } = req
     const body = {
       ...req.body
     }
 
-    body.hashed_password = await hash(
-      body.password,
-      Math.floor(Math.random() * 10 + 10)
-    )
+    if (user?.is_admin) {
+      body.hashed_password = await hash(
+        body.password.length >= 8 ? body.password : 'Risqlac+2022',
+        Math.floor(Math.random() * 10 + 10)
+      )
 
-    delete body.password
+      delete body.password
+      body.created_at, body.updated_at = new Date()
 
-    if (body.is_admin && !user?.is_admin) {
-      delete body.is_admin
+      if (await prisma.user.create({
+        data: body
+      }).catch((err: Error) => {
+        next({
+          err
+        })
+      })) {
+        next({
+          status: 201
+        })
+      }
+    } else {
+      next({
+        status: 403
+      })
     }
-
-    await prisma.user.create({
-      data: body
-    }).catch((err: Error) => {
-      next({ err })
-    })
-
-    res.status(201).json({ message: 'user created' })
   },
 
   update: async (req, res, next) => {
     const { user } = req
-    const targetUserId = req.body?.id
+    const body = {
+      ...req.body
+    }
 
-    const targetUser = await prisma.user.findUnique({
-      where: {
-        id: user?.is_admin && targetUserId ?
-          String(targetUserId)
-          :
-          user?.id
-      }
-    }).catch((err: Error) => {
-      next({ err })
-    })
-
-    if (targetUser) {
-      const body = {
-        ...req.body
-      }
-
-      if (!user?.is_admin) {
-        delete body.is_admin
-      }
-
-      await prisma.user.update({
+    if (user?.is_admin) {
+      if (await prisma.user.update({
         where: {
-          id: targetUser.id
+          id: String(body.id)
         },
-        data: {
-          id: body.id,
-          name: body.name,
-          username: body.username,
-          is_admin: body.is_admin,
-          email: body.email,
-          phone: body.phone,
-          updated_at: new Date()
-        }
+        data: body
       }).catch((err: Error) => {
-        next({ err })
-      })
-
-      res.status(200).json({ message: 'user updated' })
+        next({
+          err
+        })
+      })) {
+        next({
+          status: 200
+        })
+      }
     } else {
-      res.status(404).json({ message: 'user not found' })
+      next({
+        status: 403
+      })
     }
   },
 
-  delete: async (req, res, next) => {
+  delete: async (req, res, next): Promise<void> => {
     const { user } = req
-    const targetUserId = req.body?.id
+    const id = req.query.id
 
-    const targetUser = await prisma.user.findUnique({
-      where: {
-        id: user?.is_admin && targetUserId ?
-          String(targetUserId)
-          :
-          user?.id
-      }
-    }).catch((err: Error) => {
-      next({ err })
-    })
-
-    if (targetUser) {
-      await prisma.user.delete({
-        where: {
-          id: targetUser.id
+    if (id) {
+      if (user?.is_admin) {
+        if (await prisma.user.delete({
+          where: {
+            id: String(id)
+          }
+        }).catch((err: Error) => {
+          next({
+            err
+          })
+        })) {
+          next({
+            status: 200
+          })
         }
-      }).catch((err: Error) => {
-        next({ err })
-      })
-
-      res.status(200).json({ message: 'user deleted' })
+      } else {
+        next({
+          status: 403
+        })
+      }
     } else {
-      res.status(404).json({ message: 'user not found' })
+      next({
+        status: 412
+      })
     }
   }
 } as App.Controllers.Users

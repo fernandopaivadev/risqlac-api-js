@@ -1,16 +1,21 @@
-import configFile from '../../config.json'
+import { config as dotenvConfig } from 'dotenv'
+
+dotenvConfig()
 
 const config: {
   HTTP_SERVER_PORT: string
   DATABASE_URL: string
   JWT: { secret: string, expTime: string }
   RECOVERY_JWT: { secret: string, expTime: string }
-  SUPPORT_EMAIL: {
+  EMAIL_CONFIG: {
     host: string
-    email: string
-    password: string
-  }
+    port: string
+    auth: {
+      user: string
+      pass: string
+    }
+  },
   RESET_PASSWORD_LINK: string
-} = configFile
+} = JSON.parse(process.env.CONFIG ?? '{}')
 
 export default config

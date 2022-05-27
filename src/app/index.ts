@@ -16,7 +16,9 @@ app.use(cors({
 app.use(helmet())
 app.use(json())
 app.use(urlencoded({ extended: true }))
-app.use(morgan('combined'))
+app.use(morgan('common', {
+  skip: (req, res) => req.path === '/user/login'
+}))
 
 app.use('/', routes)
 
