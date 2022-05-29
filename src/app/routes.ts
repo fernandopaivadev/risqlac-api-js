@@ -14,8 +14,7 @@ const controllers: { [key: string]: {
 }
 
 const authNotRequired = [
-  '/user/auth',
-  '/user/create',
+  '/user/login',
   '/user/forgot-password',
   '/user/reset-password'
 ]

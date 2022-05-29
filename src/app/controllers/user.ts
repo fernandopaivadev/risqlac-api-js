@@ -201,6 +201,7 @@ export default {
         select: {
           id: true,
           username: true,
+          name: true,
           email: true,
           phone: true,
           is_admin: true
@@ -242,7 +243,8 @@ export default {
         is_admin: true,
         email: true,
         username: true,
-        phone: true
+        phone: true,
+        name: true
       }
     }).catch((err: Error) => {
       next({
