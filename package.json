@@ -10,7 +10,7 @@
     "update": "yarn upgrade --latest",
     "dev": "nodemon",
     "build": "rm -rf dist && babel src --extensions \".ts\" --out-dir dist --copy-files --no-copy-ignored",
-    "start": "yarn build && node ./dist/index.js",
+    "start": "node ./dist/index.js",
     "lint": "eslint --fix src/**/*.ts",
     "v": "sh -c 'npm version ${0} -no-git-tag-version'",
     "docker:ps": "sudo docker ps -a",
