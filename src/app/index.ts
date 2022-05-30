@@ -4,6 +4,7 @@ import express, { json, urlencoded } from 'express'
 import helmet from 'helmet'
 import morgan from 'morgan'
 
+import { version, description } from '../../package.json'
 import { routes } from './routes'
 
 const app = express()
@@ -21,6 +22,13 @@ app.use(morgan('common', {
 }))
 
 app.use('/', routes)
+
+app.get('/', (req, res) => {
+  res.status(200).json({
+    version,
+    description
+  })
+})
 
 export {
   app
