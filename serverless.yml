@@ -55,10 +55,10 @@ functions:
           method: ANY
           path: /user/{param}
 
-  users:
+  products:
     handler: dist/handler.products
-    name: users-${sls:stage}
+    name: products-${sls:stage}
     events:
       - httpApi:
           method: ANY
-          path: /user/{param}
+          path: /product/{param}
