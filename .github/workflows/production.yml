@@ -1,0 +1,54 @@
+name: Deploy to stage production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: yarn install
+        env:
+          CI: true
+        run: |
+          yarn install --frozen-lockfile
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: sa-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Create .env file
+        run: |
+          rm -f .env
+          touch .env
+          echo DATABASE_URL: ${{ secrets.DATABASE_URL }} >> .env
+          echo JWT_SECRET: ${{ secrets.JWT_SECRET }} >> .env
+          echo JWT_EXP_TIME: ${{ secrets.JWT_EXP_TIME }} >> .env
+          echo RECOVERY_JWT_SECRET: ${{ secrets.RECOVERY_JWT_SECRET }} >> .env
+          echo RECOVERY_JWT_EXP_TIME: ${{ secrets.RECOVERY_JWT_EXP_TIME }} >> .env
+          echo SUPPORT_EMAIL: ${{ secrets.SUPPORT_EMAIL }} >> .env
+          echo EMAIL_CONFIG_HOST: ${{ secrets.EMAIL_CONFIG_HOST }} >> .env
+          echo EMAIL_CONFIG_PORT: ${{ secrets.EMAIL_CONFIG_PORT }} >> .env
+          echo EMAIL_CONFIG_AUTH_USER: ${{ secrets.EMAIL_CONFIG_AUTH_USER }} >> .env
+          echo EMAIL_CONFIG_AUTH_PASS: ${{ secrets.EMAIL_CONFIG_AUTH_PASS }} >> .env
+          echo RESET_PASSWORD_LINK: ${{ secrets.RESET_PASSWORD_LINK }} >> .env
+          echo RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }} >> .env
+          cat .env
+        shell: bash
+
+      - name: deploy
+        run: |
+          yarn build
+          yarn minify dist
+          npx prisma generate
+          npx serverless deploy -s prod --force
