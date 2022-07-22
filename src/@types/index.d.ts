@@ -12,7 +12,7 @@ interface DefaultResponse {
 }
 
 interface CustomRequest extends Request {
-  userId?: number
+  userId?: string
   token?: string
   user?: Omit<user, 'hashed_password'> | void | null
 }
@@ -81,17 +81,8 @@ export namespace Services {
 
   type scope =
     | 'DATABASE'
-    | 'REDIS'
-    | 'MQTT'
-    | 'CALC_ENERGY'
-    | 'CALC_DAY_ENERGY'
-    | 'CALC_MONTH_ENERGY'
-    | 'CALC_YEAR_ENERGY'
-    | 'CLEAN_OBJECT_STORAGE'
     | 'CONTROLLER'
-    | 'WEBSOCKET'
     | 'EMAIL_SHIPPING'
-    | 'GENERATE_REPORT'
 
   export interface Log {
     error: (scope: scope, err: Error) => void

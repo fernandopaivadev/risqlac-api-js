@@ -1,8 +1,7 @@
-import { log } from 'src/services'
+import { Middleware } from '../@types'
+import { log } from '../services'
 
-import { App } from '@types'
-
-const SendResponse: App.Middleware.SendResponse = async (
+const SendResponse: Middleware.SendResponse = async (
   { status, data, err }, req, res, next
 ) => {
   if (!res.headersSent) {

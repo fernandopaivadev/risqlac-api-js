@@ -1,7 +1,7 @@
-import { prisma } from '@database'
-import { App } from '@types'
+import { Middleware } from '../@types'
+import { prisma } from '../database'
 
-const verifyUser: App.Middleware.VerifyUser = async (req, res, next) => {
+const verifyUser: Middleware.VerifyUser = async (req, res, next) => {
   if (req.userId) {
     const user = await prisma.user.findUnique({
       where: {
@@ -10,6 +10,7 @@ const verifyUser: App.Middleware.VerifyUser = async (req, res, next) => {
       select: {
         id: true,
         is_admin: true,
+        name: true,
         email: true,
         username: true,
         phone: true,

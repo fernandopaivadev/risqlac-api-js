@@ -1,13 +1,13 @@
 import { verify } from 'jsonwebtoken'
 
-import config from '@config'
-import { App } from '@types'
+import { Middleware } from '../@types'
+import config from '../config'
 
-const verifyToken: App.Middleware.VerifyToken = async (req, res, next) => {
+const verifyToken: Middleware.VerifyToken = async (req, res, next) => {
   const token: string | undefined = req.headers.authorization?.split(' ')[1]
 
   if (token) {
-    const { secret } = config.JWT
+    const secret = config.JWT_SECRET
 
     verify(token, secret, (err, payload: any) => {
       if (err) {

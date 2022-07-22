@@ -2,7 +2,6 @@ import { Router } from 'express'
 
 import { Services } from '../@types'
 import sendResponse from '../middleware/sendResponse'
-import uploadFile from '../middleware/uploadFile'
 import verifyToken from '../middleware/verifyToken'
 import verifyUser from '../middleware/verifyUser'
 
@@ -64,7 +63,6 @@ const generateRouter: Services.GenerateRouter = ({
             path,
             verifyToken,
             verifyUser,
-            uploadFile,
             endpoint,
             sendResponse
           )

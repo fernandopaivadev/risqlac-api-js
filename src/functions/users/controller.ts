@@ -1,11 +1,10 @@
 import { hash, compare } from 'bcrypt'
 import { sign, verify } from 'jsonwebtoken'
-import { sendEmail } from 'src/services'
 
 import { Functions } from '../../@types'
 import config from '../../config'
 import { prisma } from '../../database'
-
+import { sendEmail } from '../../services'
 
 export default {
   login: async (req, res, next) => {
@@ -31,8 +30,8 @@ export default {
         )
 
         if (isValid) {
-          const { secret, expTime } = config.JWT
-
+          const secret = config.JWT_SECRET
+          const expTime = config.JWT_EXP_TIME
           const token = sign(
             {
               id: user.id
@@ -82,8 +81,8 @@ export default {
       })
 
       if (user) {
-        const { secret, expTime } = config.RECOVERY_JWT
-
+        const secret = config.RECOVERY_JWT_SECRET
+        const expTime = config.RECOVERY_JWT_EXP_TIME
         const token = sign(
           {
             id: user.id
@@ -101,7 +100,7 @@ export default {
         const subject = 'TechAmazon - Recuperação de Senha'
 
         await sendEmail({
-          from: config.EMAIL_CONFIG.auth.user,
+          from: config.EMAIL_CONFIG_AUTH_USER,
           to: user.email,
           subject,
           template: 'resetPassword',
@@ -128,7 +127,7 @@ export default {
   resetPassword: async (req, res, next) => {
     const tokenFromBody = req.body.token
     const token: string = tokenFromBody ? tokenFromBody : req.headers.authorization?.split(' ')[1]
-    const secret = tokenFromBody ? config.RECOVERY_JWT.secret : config.JWT.secret
+    const secret = tokenFromBody ? config.RECOVERY_JWT_SECRET : config.JWT_SECRET
 
     if (token) {
       verify(token, secret, async (err, payload: any) => {

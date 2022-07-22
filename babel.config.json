@@ -11,6 +11,7 @@
     "@babel/preset-typescript"
   ],
   "ignore": [
+    "node_modules/**",
     "**/*.spec.ts",
     "**/*.test.ts"
   ]

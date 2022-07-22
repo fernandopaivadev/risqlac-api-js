@@ -1,6 +1,4 @@
-import { stderr, stdout } from 'process'
-
-import { Shared } from '@types'
+import { Services } from '../@types'
 
 export default {
   error: (scope, err) => {
@@ -14,4 +12,4 @@ export default {
   info: (info) => {
     console.log(`\nINFO > ${info}\n`)
   }
-} as Shared.Log
+} as Services.Log
