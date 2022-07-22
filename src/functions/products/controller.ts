@@ -1,5 +1,5 @@
-import { prisma } from '@database'
-import { App } from '@types'
+import { Functions } from '../../@types'
+import { prisma } from '../../database'
 
 export default {
   create: async (req, res, next) => {
@@ -148,4 +148,4 @@ export default {
       })
     }
   }
-} as App.Controllers.Products
+} as Functions.Controllers.Products

@@ -1,10 +1,11 @@
 import { hash, compare } from 'bcrypt'
 import { sign, verify } from 'jsonwebtoken'
+import { sendEmail } from 'src/services'
 
-import config from '@config'
-import { prisma } from '@database'
-import { sendEmail } from '@shared'
-import { App } from '@types'
+import { Functions } from '../../@types'
+import config from '../../config'
+import { prisma } from '../../database'
+
 
 export default {
   login: async (req, res, next) => {
@@ -357,4 +358,4 @@ export default {
       })
     }
   }
-} as App.Controllers.Users
+} as Functions.Controllers.Users

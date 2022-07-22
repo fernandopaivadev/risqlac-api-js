@@ -4,7 +4,7 @@ import { Shared } from '@types'
 
 export default {
   error: (scope, err) => {
-    stderr.write(`\nERROR > ${scope} > ${
+    console.log(`\nERROR > ${scope} > ${
       typeof err.message === 'object' ?
         JSON.stringify(err, null, 2)
         :
@@ -12,6 +12,6 @@ export default {
     }\n`)
   },
   info: (info) => {
-    stdout.write(`\nINFO > ${info}\n`)
+    console.log(`\nINFO > ${info}\n`)
   }
 } as Shared.Log

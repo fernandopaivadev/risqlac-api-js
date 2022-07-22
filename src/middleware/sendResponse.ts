@@ -1,4 +1,5 @@
-import { log } from '@shared'
+import { log } from 'src/services'
+
 import { App } from '@types'
 
 const SendResponse: App.Middleware.SendResponse = async (

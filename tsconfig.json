@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ESNext",
     "module": "commonjs",
-    "outDir": "./dist",
+    "outDir": "dist",
     "sourceMap": true,
     "removeComments": true,
     "strict": true,
@@ -12,20 +12,6 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@types": [
-        "./src/@types/index.d.ts"
-      ],
-      "@database": [
-        "./src/database/index.ts"
-      ],
-      "@shared": [
-        "./src/shared/index.ts"
-      ],
-      "@config": [
-        "./src/config/index.ts"
-      ]
-    }
+    "forceConsistentCasingInFileNames": true
   }
 }

@@ -1,0 +1,64 @@
+service: risqlac-api
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: sa-east-1
+  stage: ${opt:stage, 'dev'}
+  logRetentionInDays: ${self:custom.logRetentionInDays.${self:provider.stage}}
+  memorySize: 256
+  timeout: 20
+  httpApi:
+    cors: true
+  iam:
+    role:
+      name: risqlac-api-iam-role
+
+package:
+  patterns:
+    - "dist/**"
+    - "!src/**"
+    - "!prisma/**"
+    - "!scripts/**"
+    - "!node_modules/**"
+
+    - "node_modules/.prisma/client/**"
+    - "node_modules/@prisma/**"
+    - "node_modules/prisma/**"
+
+    - "!node_modules/.prisma/client/libquery_engine-*"
+    - "node_modules/.prisma/client/libquery_engine-rhel-*"
+    - "!node_modules/prisma/libquery_engine-*"
+    - "!node_modules/@prisma/engines/**"
+
+plugins:
+  - serverless-offline
+  - serverless-plugin-common-excludes # this should go before serverless-plugin-include-dependencies
+  - serverless-plugin-include-dependencies
+  - serverless-stage-manager
+
+custom:
+  stages:
+    - dev
+    - prod
+  logRetentionInDays:
+    prod: 30
+    dev: 5
+
+functions:
+  users:
+    handler: dist/handler.users
+    name: users-${sls:stage}
+    events:
+      - httpApi:
+          method: ANY
+          path: /user/{param}
+
+  users:
+    handler: dist/handler.products
+    name: users-${sls:stage}
+    events:
+      - httpApi:
+          method: ANY
+          path: /user/{param}

@@ -1,40 +1,54 @@
-import { Request, Response } from 'express'
+import { Request, Response, Router, Express } from 'express'
+import { Attachment } from 'nodemailer/lib/mailer'
 
-export namespace App {
-  interface DefaultResponse {
-    status?: number
-    data?: {
-      [key: string]: any
-    }
-    err?: Error
+import { user } from '@prisma/client'
+
+interface DefaultResponse {
+  status?: number
+  data?: {
+    [key: string]: any
   }
+  err?: Error
+}
 
-  interface CustomRequest extends Request {
-    userId: string
-    user: {
-      id: string,
-      is_admin: boolean,
-      email: string,
-      username: string,
-      phone: string,
-      created_at: Date,
-      updated_at: Date
-    } | void | null
-  }
+interface CustomRequest extends Request {
+  userId?: number
+  token?: string
+  user?: Omit<user, 'hashed_password'> | void | null
+}
 
-  type CustomNextFunction = ({ status, data, err }?: DefaultResponse) => void
+type CustomNextFunction = ({ status, data, err }?: DefaultResponse) => void
 
-  namespace Middleware {
-    type VerifyUser = (req: CustomRequest, res: Response, next: NextFunction) => void
-    type VerifyToken = (req: CustomRequest, res: Response, next: NextFunction) => void
-    type SendResponse = ({ status, data, err }: DefaultResponse, req: CustomRequest, res: Response, next: NextFunction) => void
-  }
+export namespace Middleware {
+  export type VerifyUser = (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+  ) => void
+  export type VerifyToken = (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+  ) => void
+  export type SendResponse = (
+    { status, data, err }: DefaultResponse,
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+  ) => void
+}
 
-  namespace Controllers {
-    type Endpoint = (req: CustomRequest, res: Response, next: CustomNextFunction) => Promise<void>
+export namespace Functions {
+  export namespace Controllers {
+    type Endpoint = (
+      req: CustomRequest,
+      res: Response,
+      next: CustomNextFunction
+    ) => Promise<void>
 
-    interface Users {
+    export interface Users {
       login: Endpoint
+      logout: Endpoint
       forgotPassword: Endpoint
       resetPassword: Endpoint
       create: Endpoint
@@ -44,7 +58,7 @@ export namespace App {
       delete: Endpoint
     }
 
-    interface Products {
+    export interface Products {
       create: Endpoint
       list: Endpoint
       data: Endpoint
@@ -54,29 +68,44 @@ export namespace App {
   }
 }
 
-export namespace Shared {
-  type scope =
-    'HTTP_SERVER' |
-    'DATABASE' |
-    'REDIS' |
-    'MQTT' |
-    'CALC_ENERGY' |
-    'CALC_DAY_ENERGY' |
-    'CALC_MONTH_ENERGY' |
-    'CALC_YEAR_ENERGY' |
-    'CLEAN_OBJECT_STORAGE' |
-    'CONTROLLER' |
-    'WEBSOCKET' |
-    'EMAIL_SHIPPING' |
-    'GENERATE_REPORT'
+export namespace Services {
+  type GenerateReport = ({
+    type,
+    data
+  }: GenerateReport.Params) => Promise<void | Buffer | null>
 
-  interface Log {
+  export type GetUTC = (
+    timezone: string | undefined | null,
+    date: Date
+  ) => string | undefined
+
+  type scope =
+    | 'DATABASE'
+    | 'REDIS'
+    | 'MQTT'
+    | 'CALC_ENERGY'
+    | 'CALC_DAY_ENERGY'
+    | 'CALC_MONTH_ENERGY'
+    | 'CALC_YEAR_ENERGY'
+    | 'CLEAN_OBJECT_STORAGE'
+    | 'CONTROLLER'
+    | 'WEBSOCKET'
+    | 'EMAIL_SHIPPING'
+    | 'GENERATE_REPORT'
+
+  export interface Log {
     error: (scope: scope, err: Error) => void
     info: (info: string) => void
   }
 
   namespace SendEmail {
-    type HandlebarsTemplate = 'resetPassword'
+    type HandlebarsTemplate =
+      | 'maintenanceCreate'
+      | 'maintenanceUpdate'
+      | 'correctiveMaintenance'
+      | 'preventiveMaintenance'
+      | 'resetPassword'
+      | 'maintenanceReport'
 
     interface MaintenanceData {
       guide: string
@@ -92,16 +121,52 @@ export namespace Shared {
     }
 
     interface Params {
-      from: string,
-      to: string | string[],
-      subject: string,
+      from: string
+      to: string | string[]
+      subject: string
       template: HandlebarsTemplate
       data: MaintenanceData | ResetPasswordData
       attachments?: Attachment[]
     }
 
-    type SendEmailFunction = ({
-      from, to, subject, template, data, attachments
+    export type SendEmailFunction = ({
+      from,
+      to,
+      subject,
+      template,
+      data,
+      attachments
     }: SendEmail.Params) => Promise<void>
   }
+
+  interface GenerateRouterParams {
+    controllerName: string
+    controller: { [key: string]: Controllers.Endpoint }
+  }
+
+  export type GenerateRouter = ({
+    controllerName,
+    controller
+  }: GenerateRouterParams) => Router
+
+  export type GenerateApp = (router: Router) => Express
+}
+
+export interface Config {
+  DATABASE_URL: string
+
+  JWT_SECRET: string
+  JWT_EXP_TIME: string
+
+  RECOVERY_JWT_SECRET: string
+  RECOVERY_JWT_EXP_TIME: string
+
+  SUPPORT_EMAIL: string
+
+  EMAIL_CONFIG_HOST: string
+  EMAIL_CONFIG_PORT: number
+  EMAIL_CONFIG_AUTH_USER: string
+  EMAIL_CONFIG_AUTH_PASS: string
+
+  RESET_PASSWORD_LINK: string
 }

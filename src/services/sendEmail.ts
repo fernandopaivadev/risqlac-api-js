@@ -3,11 +3,11 @@ import { compile } from 'handlebars'
 import { createTransport } from 'nodemailer'
 import path from 'path'
 
-import config from '@config'
-import { log } from '@shared'
-import { Shared } from '@types'
+import { Services } from '../@types'
+import config from '../config'
+import { log } from '../services'
 
-const sendEmail: Shared.SendEmail.SendEmailFunction = async ({
+const sendEmail: Services.SendEmail.SendEmailFunction = async ({
   from, to, subject, template, data, attachments
 }) => {
   const templatePath = path.resolve(
@@ -19,8 +19,12 @@ const sendEmail: Shared.SendEmail.SendEmailFunction = async ({
   const result = compiledTemplate(data)
 
   const transporter = createTransport({
-    secure: false,
-    ...config.EMAIL_CONFIG
+    host: config.EMAIL_CONFIG_HOST,
+    port: config.EMAIL_CONFIG_PORT,
+    auth: {
+      user: config.EMAIL_CONFIG_AUTH_USER,
+      pass: config.EMAIL_CONFIG_AUTH_PASS
+    }
   })
 
   await transporter.sendMail({

@@ -10,19 +10,6 @@
     ],
     "@babel/preset-typescript"
   ],
-  "plugins": [
-    [
-      "module-resolver",
-      {
-        "alias": {
-          "@types": "./dist/@types/index.d.js",
-          "@shared": "./dist/shared/index.js",
-          "@database": "./dist/database/index.js",
-          "@config": "./dist/config/index.js"
-        }
-      }
-    ]
-  ],
   "ignore": [
     "**/*.spec.ts",
     "**/*.test.ts"
