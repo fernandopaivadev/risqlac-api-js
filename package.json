@@ -38,6 +38,7 @@
     "eslint-import-resolver-typescript": "^3.3.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-import-helpers": "^1.2.1",
+    "minify-all-js": "^0.1.9",
     "nodemon": "^2.0.19",
     "prisma": "^4.1.0",
     "serverless": "^3.21.0",
