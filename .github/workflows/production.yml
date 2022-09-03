@@ -12,13 +12,13 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: "16"
+          node-version: '16'
 
-      - name: yarn install
+      - name: npm install
         env:
           CI: true
         run: |
-          yarn install --frozen-lockfile
+          npm install --frozen-lockfile
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -32,23 +32,16 @@ jobs:
           rm -f .env
           touch .env
           echo DATABASE_URL: ${{ secrets.DATABASE_URL }} >> .env
-          echo JWT_SECRET: ${{ secrets.JWT_SECRET }} >> .env
-          echo JWT_EXP_TIME: ${{ secrets.JWT_EXP_TIME }} >> .env
-          echo RECOVERY_JWT_SECRET: ${{ secrets.RECOVERY_JWT_SECRET }} >> .env
-          echo RECOVERY_JWT_EXP_TIME: ${{ secrets.RECOVERY_JWT_EXP_TIME }} >> .env
-          echo SUPPORT_EMAIL: ${{ secrets.SUPPORT_EMAIL }} >> .env
           echo EMAIL_CONFIG_HOST: ${{ secrets.EMAIL_CONFIG_HOST }} >> .env
           echo EMAIL_CONFIG_PORT: ${{ secrets.EMAIL_CONFIG_PORT }} >> .env
           echo EMAIL_CONFIG_AUTH_USER: ${{ secrets.EMAIL_CONFIG_AUTH_USER }} >> .env
           echo EMAIL_CONFIG_AUTH_PASS: ${{ secrets.EMAIL_CONFIG_AUTH_PASS }} >> .env
-          echo RESET_PASSWORD_LINK: ${{ secrets.RESET_PASSWORD_LINK }} >> .env
-          echo RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }} >> .env
           cat .env
         shell: bash
 
       - name: deploy
         run: |
-          yarn build
-          yarn minify dist
+          npm run build
+          npm run minify dist
           npx prisma generate
           npx serverless deploy -s prod --force

@@ -10,11 +10,7 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "plugins": [
-    "import",
-    "@typescript-eslint",
-    "eslint-plugin-import-helpers"
-  ],
+  "plugins": ["import", "@typescript-eslint", "eslint-plugin-import-helpers"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -28,35 +24,16 @@
     "no-unused-vars": 0,
     "node/no-unsupported-features/es-syntax": 0,
     "strict": 0,
-    "indent": [
-      "error",
-      2
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "semi": [
-      "error",
-      "never"
-    ],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "never"],
     "func-names": "off",
-    "comma-dangle": [
-      "error",
-      "never"
-    ],
+    "comma-dangle": ["error", "never"],
     "import-helpers/order-imports": [
       "warn",
       {
         "newlinesBetween": "always",
-        "groups": [
-          "module",
-          "/^@/"
-        ],
+        "groups": ["module", "/^@/"],
         "alphabetize": {
           "order": "asc",
           "ignoreCase": true
@@ -66,10 +43,7 @@
   },
   "settings": {
     "import/parsers": {
-      "@typescript-eslint/parser": [
-        ".ts",
-        ".tsx"
-      ]
+      "@typescript-eslint/parser": [".ts", ".tsx"]
     },
     "import/resolver": {
       "typescript": {

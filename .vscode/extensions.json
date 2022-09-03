@@ -15,6 +15,9 @@
     "editorconfig.editorconfig",
     "wix.vscode-import-cost",
     "mikestead.dotenv",
-    "editorconfig.editorconfig"
+    "editorconfig.editorconfig",
+    "esbenp.prettier-vscode",
+    "dracula-theme.theme-dracula",
+    "cschleiden.vscode-github-actions"
   ]
 }

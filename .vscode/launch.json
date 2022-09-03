@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Serverless API",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "debug"
+      ],
+      "program": "${workspaceFolder}/dist/handler.js",
+      "outFiles": [
+        "${workspaceFolder}/**/*.js"
+      ],
+      "killBehavior": "forceful",
+      "sourceMaps": true
+    }
+  ]
+}

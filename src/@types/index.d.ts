@@ -79,10 +79,7 @@ export namespace Services {
     date: Date
   ) => string | undefined
 
-  type scope =
-    | 'DATABASE'
-    | 'CONTROLLER'
-    | 'EMAIL_SHIPPING'
+  type scope = 'DATABASE' | 'CONTROLLER' | 'EMAIL_SHIPPING'
 
   export interface Log {
     error: (scope: scope, err: Error) => void
@@ -135,29 +132,22 @@ export namespace Services {
     controller: { [key: string]: Controllers.Endpoint }
   }
 
-  export type GenerateRouter = ({
+  export type CreateRouter = ({
     controllerName,
     controller
   }: GenerateRouterParams) => Router
 
-  export type GenerateApp = (router: Router) => Express
+  export type CreateApp = (router: Router) => Express
 }
 
 export interface Config {
   DATABASE_URL: string
 
   JWT_SECRET: string
-  JWT_EXP_TIME: string
-
-  RECOVERY_JWT_SECRET: string
-  RECOVERY_JWT_EXP_TIME: string
-
-  SUPPORT_EMAIL: string
+  JWT_EXP_TIME: number
 
   EMAIL_CONFIG_HOST: string
   EMAIL_CONFIG_PORT: number
   EMAIL_CONFIG_AUTH_USER: string
   EMAIL_CONFIG_AUTH_PASS: string
-
-  RESET_PASSWORD_LINK: string
 }

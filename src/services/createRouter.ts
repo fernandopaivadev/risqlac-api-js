@@ -7,29 +7,31 @@ import verifyUser from '../middleware/verifyUser'
 
 const getHTTPMethod = (routeName: string): string => {
   switch (routeName) {
-  case 'logout':
-    return 'delete'
-  case 'create':
-    return 'post'
-  case 'update':
-    return 'put'
-  case 'delete':
-    return 'delete'
-  case 'resetPassword':
-    return 'patch'
-  default:
-    return 'get'
+    case 'logout':
+      return 'delete'
+    case 'create':
+      return 'post'
+    case 'update':
+      return 'put'
+    case 'delete':
+      return 'delete'
+    case 'resetPassword':
+      return 'patch'
+    default:
+      return 'get'
   }
 }
 
 const getPath = (controllerName: string, routeName: string): string =>
-  `/${
-    controllerName.split(/(?=[A-Z])/).join('-').toLowerCase()
-  }/${
-    routeName.split(/(?=[A-Z])/).join('-').toLowerCase()
-  }`
+  `/${controllerName
+    .split(/(?=[A-Z])/)
+    .join('-')
+    .toLowerCase()}/${routeName
+    .split(/(?=[A-Z])/)
+    .join('-')
+    .toLowerCase()}`
 
-const generateRouter: Services.GenerateRouter = ({
+const createRouter: Services.CreateRouter = ({
   controller,
   controllerName
 }) => {
@@ -49,31 +51,12 @@ const generateRouter: Services.GenerateRouter = ({
 
     if (method && path) {
       if (loginNotRequired.includes(path)) {
-        router[method](
-          path,
-          endpoint,
-          sendResponse
-        )
+        router[method](path, endpoint, sendResponse)
       } else {
-        if ([
-          '/object-storage/create',
-          '/archive/create'
-        ].includes(path)) {
-          router[method](
-            path,
-            verifyToken,
-            verifyUser,
-            endpoint,
-            sendResponse
-          )
+        if (['/object-storage/create', '/archive/create'].includes(path)) {
+          router[method](path, verifyToken, verifyUser, endpoint, sendResponse)
         } else {
-          router[method](
-            path,
-            verifyToken,
-            verifyUser,
-            endpoint,
-            sendResponse
-          )
+          router[method](path, verifyToken, verifyUser, endpoint, sendResponse)
         }
       }
     }
@@ -82,4 +65,4 @@ const generateRouter: Services.GenerateRouter = ({
   return router
 }
 
-export default generateRouter
+export default createRouter

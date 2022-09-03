@@ -1,11 +1,6 @@
-import generateApp from './generateApp'
-import generateRouter from './generateRouter'
+import createApp from './createApp'
+import createRouter from './createRouter'
 import log from './log'
 import sendEmail from './sendEmail'
 
-export {
-  generateApp,
-  generateRouter,
-  sendEmail,
-  log
-}
+export { createApp, createRouter, sendEmail, log }
