@@ -1,5 +1,5 @@
 service: risqlac-api
-frameworkVersion: "3"
+frameworkVersion: '3'
 
 provider:
   name: aws
@@ -18,26 +18,27 @@ provider:
 
 package:
   patterns:
-    - "dist/**"
-    - "!src/**"
-    - "!prisma/**"
-    - "!scripts/**"
-    - "!node_modules/**"
+    - 'dist/**'
+    - '!src/**'
+    - '!prisma/**'
+    - '!scripts/**'
+    - '!node_modules/**'
 
-    - "node_modules/.prisma/client/**"
-    - "node_modules/@prisma/**"
-    - "node_modules/prisma/**"
+    - 'node_modules/.prisma/client/**'
+    - 'node_modules/@prisma/**'
+    - 'node_modules/prisma/**'
 
-    - "!node_modules/.prisma/client/libquery_engine-*"
-    - "node_modules/.prisma/client/libquery_engine-rhel-*"
-    - "!node_modules/prisma/libquery_engine-*"
-    - "!node_modules/@prisma/engines/**"
+    - '!node_modules/.prisma/client/libquery_engine-*'
+    - 'node_modules/.prisma/client/libquery_engine-rhel-*'
+    - '!node_modules/prisma/libquery_engine-*'
+    - '!node_modules/@prisma/engines/**'
 
 plugins:
   - serverless-offline
   - serverless-plugin-common-excludes # this should go before serverless-plugin-include-dependencies
   - serverless-plugin-include-dependencies
   - serverless-stage-manager
+  - serverless-prune-plugin
 
 custom:
   stages:
@@ -46,8 +47,19 @@ custom:
   logRetentionInDays:
     prod: 30
     dev: 5
+  prune:
+    automatic: true
+    number: 1
 
 functions:
+  info:
+    handler: dist/handler.info
+    name: info-${sls:stage}
+    events:
+      - httpApi:
+          method: ANY
+          path: /info/{param}
+
   users:
     handler: dist/handler.users
     name: users-${sls:stage}

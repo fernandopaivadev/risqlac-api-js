@@ -53,7 +53,6 @@ export namespace Functions {
       resetPassword: Endpoint
       create: Endpoint
       list: Endpoint
-      data: Endpoint
       update: Endpoint
       delete: Endpoint
     }
@@ -61,7 +60,6 @@ export namespace Functions {
     export interface Products {
       create: Endpoint
       list: Endpoint
-      data: Endpoint
       update: Endpoint
       delete: Endpoint
     }
@@ -69,11 +67,6 @@ export namespace Functions {
 }
 
 export namespace Services {
-  type GenerateReport = ({
-    type,
-    data
-  }: GenerateReport.Params) => Promise<void | Buffer | null>
-
   export type GetUTC = (
     timezone: string | undefined | null,
     date: Date
@@ -86,14 +79,13 @@ export namespace Services {
     info: (info: string) => void
   }
 
-  namespace SendEmail {
+  export namespace SendEmail {
     type HandlebarsTemplate =
       | 'maintenanceCreate'
       | 'maintenanceUpdate'
       | 'correctiveMaintenance'
       | 'preventiveMaintenance'
       | 'resetPassword'
-      | 'maintenanceReport'
 
     interface MaintenanceData {
       guide: string
@@ -105,16 +97,7 @@ export namespace Services {
     }
 
     interface ResetPasswordData {
-      resetPasswordLink: string
-    }
-
-    interface Params {
-      from: string
-      to: string | string[]
-      subject: string
-      template: HandlebarsTemplate
-      data: MaintenanceData | ResetPasswordData
-      attachments?: Attachment[]
+      token: string
     }
 
     export type SendEmailFunction = ({
@@ -124,18 +107,23 @@ export namespace Services {
       template,
       data,
       attachments
-    }: SendEmail.Params) => Promise<void>
-  }
-
-  interface GenerateRouterParams {
-    controllerName: string
-    controller: { [key: string]: Controllers.Endpoint }
+    }: {
+      from: string
+      to: string | string[]
+      subject: string
+      template: HandlebarsTemplate
+      data: MaintenanceData | ResetPasswordData
+      attachments?: Attachment[]
+    }) => Promise<void>
   }
 
   export type CreateRouter = ({
     controllerName,
     controller
-  }: GenerateRouterParams) => Router
+  }: {
+    controllerName: string
+    controller: { [key: string]: Controllers.Endpoint }
+  }) => Router
 
   export type CreateApp = (router: Router) => Express
 }

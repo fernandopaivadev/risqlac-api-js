@@ -1,9 +1,10 @@
-name: Deploy to stage production
+name: Deploy to stage develop
 
 on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
   deploy-functions:
@@ -27,21 +28,9 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Create .env file
-        run: |
-          rm -f .env
-          touch .env
-          echo DATABASE_URL: ${{ secrets.DATABASE_URL }} >> .env
-          echo EMAIL_CONFIG_HOST: ${{ secrets.EMAIL_CONFIG_HOST }} >> .env
-          echo EMAIL_CONFIG_PORT: ${{ secrets.EMAIL_CONFIG_PORT }} >> .env
-          echo EMAIL_CONFIG_AUTH_USER: ${{ secrets.EMAIL_CONFIG_AUTH_USER }} >> .env
-          echo EMAIL_CONFIG_AUTH_PASS: ${{ secrets.EMAIL_CONFIG_AUTH_PASS }} >> .env
-          cat .env
-        shell: bash
-
       - name: deploy
         run: |
           npm run build
           npm run minify dist
           npx prisma generate
-          npx serverless deploy -s prod --force
+          npx serverless deploy -s dev --force

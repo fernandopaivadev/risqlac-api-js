@@ -12,22 +12,18 @@ export default {
     const password = req.query.password
 
     if (username && password) {
-      const user = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { email: String(username) },
-            { username: String(username) }
-          ]
-        }
-      }).catch((err: Error) => {
-        next({ err })
-      })
+      const user = await prisma.user
+        .findFirst({
+          where: {
+            OR: [{ email: String(username) }, { username: String(username) }]
+          }
+        })
+        .catch((err: Error) => {
+          next({ err })
+        })
 
       if (user) {
-        const isValid = await compare(
-          String(password),
-          user.hashed_password
-        )
+        const isValid = await compare(String(password), user.hashed_password)
 
         if (isValid) {
           const secret = config.JWT_SECRET
@@ -69,20 +65,20 @@ export default {
     const username = req.query.username
 
     if (username) {
-      const user = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { email: String(username) },
-            { username: String(username) }
-          ]
-        }
-      }).catch((err: Error) => {
-        next({ err })
-      })
+      const user = await prisma.user
+        .findFirst({
+          where: {
+            OR: [{ email: String(username) }, { username: String(username) }]
+          }
+        })
+        .catch((err: Error) => {
+          next({ err })
+        })
 
       if (user) {
-        const secret = config.RECOVERY_JWT_SECRET
-        const expTime = config.RECOVERY_JWT_EXP_TIME
+        const secret = config.JWT_SECRET
+        const expTime = 300000 // 5 minutes
+
         const token = sign(
           {
             id: user.id
@@ -91,21 +87,15 @@ export default {
           { expiresIn: expTime }
         )
 
-        const resetPasswordLink = `${
-          config.RESET_PASSWORD_LINK
-        }?token${
-          token
-        }`
+        const subject = 'RisqLAC - Recuperação de Senha'
 
-        const subject = 'TechAmazon - Recuperação de Senha'
-
-        await sendEmail({
+        sendEmail({
           from: config.EMAIL_CONFIG_AUTH_USER,
           to: user.email,
           subject,
           template: 'resetPassword',
           data: {
-            resetPasswordLink
+            token
           }
         })
 
@@ -126,11 +116,12 @@ export default {
 
   resetPassword: async (req, res, next) => {
     const tokenFromBody = req.body.token
-    const token: string = tokenFromBody ? tokenFromBody : req.headers.authorization?.split(' ')[1]
-    const secret = tokenFromBody ? config.RECOVERY_JWT_SECRET : config.JWT_SECRET
+    const token: string = tokenFromBody
+      ? tokenFromBody
+      : req.headers.authorization?.split(' ')[1]
 
     if (token) {
-      verify(token, secret, async (err, payload: any) => {
+      verify(token, config.JWT_SECRET, async (err, payload: any) => {
         if (err) {
           next({ err })
         } else {
@@ -144,13 +135,15 @@ export default {
               })
             }
 
-            const user = await prisma.user.findUnique({
-              where: {
-                id
-              }
-            }).catch((err: Error) => {
-              next({ err })
-            })
+            const user = await prisma.user
+              .findUnique({
+                where: {
+                  id
+                }
+              })
+              .catch((err: Error) => {
+                next({ err })
+              })
 
             if (user) {
               const hashed_password = await hash(
@@ -158,18 +151,22 @@ export default {
                 Math.floor(Math.random() * 10 + 10)
               )
 
-              if (await prisma.user.update({
-                where: {
-                  id: String(id)
-                },
-                data: {
-                  hashed_password
-                }
-              }).catch((err: Error) => {
-                next({
-                  err
-                })
-              })) {
+              if (
+                await prisma.user
+                  .update({
+                    where: {
+                      id: String(id)
+                    },
+                    data: {
+                      hashed_password
+                    }
+                  })
+                  .catch((err: Error) => {
+                    next({
+                      err
+                    })
+                  })
+              ) {
                 next({
                   status: 200
                 })
@@ -193,71 +190,38 @@ export default {
     }
   },
 
-  list: async (req, res, next): Promise<void> => {
+  list: async (req, res, next) => {
     const { user } = req
 
-    if (user?.is_admin) {
-      const users = await prisma.user.findMany({
+    const query = user?.is_admin ? {} : { id: user?.id }
+
+    const users = await prisma.user
+      .findMany({
         select: {
           id: true,
-          username: true,
+          is_admin: true,
           name: true,
+          username: true,
           email: true,
           phone: true,
-          is_admin: true
+          created_at: true,
+          updated_at: true
         },
         orderBy: {
           is_admin: 'asc'
+        },
+        where: {
+          ...query
         }
-      }).catch((err: Error) => {
+      })
+      .catch((err: Error) => {
         next({ err })
       })
 
-      if (users) {
-        next({
-          status: 200,
-          data: { users }
-        })
-      } else {
-        next({
-          status: 404
-        })
-      }
-    } else {
-      next({
-        status: 403
-      })
-    }
-  },
-
-  data: async (req, res, next): Promise<void> => {
-    const { user } = req
-    const id = req.query.id
-
-    const targetUser = await prisma.user.findUnique({
-      where: {
-        id: String(id && (user?.is_admin) ? id : user?.id)
-      },
-      select: {
-        id: true,
-        is_admin: true,
-        email: true,
-        username: true,
-        phone: true,
-        name: true
-      }
-    }).catch((err: Error) => {
-      next({
-        err
-      })
-    })
-
-    if (targetUser) {
+    if (users) {
       next({
         status: 200,
-        data: {
-          user: targetUser
-        }
+        data: { users }
       })
     } else {
       next({
@@ -279,15 +243,19 @@ export default {
       )
 
       delete body.password
-      body.created_at, body.updated_at = new Date()
+      body.created_at, (body.updated_at = new Date())
 
-      if (await prisma.user.create({
-        data: body
-      }).catch((err: Error) => {
-        next({
-          err
-        })
-      })) {
+      if (
+        await prisma.user
+          .create({
+            data: body
+          })
+          .catch((err: Error) => {
+            next({
+              err
+            })
+          })
+      ) {
         next({
           status: 201
         })
@@ -306,16 +274,20 @@ export default {
     }
 
     if (user?.is_admin) {
-      if (await prisma.user.update({
-        where: {
-          id: String(body.id)
-        },
-        data: body
-      }).catch((err: Error) => {
-        next({
-          err
-        })
-      })) {
+      if (
+        await prisma.user
+          .update({
+            where: {
+              id: String(body.id)
+            },
+            data: body
+          })
+          .catch((err: Error) => {
+            next({
+              err
+            })
+          })
+      ) {
         next({
           status: 200
         })
@@ -333,15 +305,19 @@ export default {
 
     if (id) {
       if (user?.is_admin) {
-        if (await prisma.user.delete({
-          where: {
-            id: String(id)
-          }
-        }).catch((err: Error) => {
-          next({
-            err
-          })
-        })) {
+        if (
+          await prisma.user
+            .delete({
+              where: {
+                id: String(id)
+              }
+            })
+            .catch((err: Error) => {
+              next({
+                err
+              })
+            })
+        ) {
           next({
             status: 200
           })

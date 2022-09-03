@@ -45,19 +45,14 @@ const createRouter: Services.CreateRouter = ({
     const loginNotRequired = [
       '/user/login',
       '/user/forgot-password',
-      '/user/reset-password',
-      '/message/create'
+      '/user/reset-password'
     ]
 
     if (method && path) {
       if (loginNotRequired.includes(path)) {
         router[method](path, endpoint, sendResponse)
       } else {
-        if (['/object-storage/create', '/archive/create'].includes(path)) {
-          router[method](path, verifyToken, verifyUser, endpoint, sendResponse)
-        } else {
-          router[method](path, verifyToken, verifyUser, endpoint, sendResponse)
-        }
+        router[method](path, verifyToken, verifyUser, endpoint, sendResponse)
       }
     }
   })
