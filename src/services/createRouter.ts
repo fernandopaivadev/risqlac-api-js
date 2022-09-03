@@ -1,9 +1,12 @@
 import { Router } from 'express'
 
 import { Services } from '../@types'
-import sendResponse from '../middleware/sendResponse'
-import verifyToken from '../middleware/verifyToken'
-import verifyUser from '../middleware/verifyUser'
+import {
+  verifyToken,
+  verifyUser,
+  logRequest,
+  sendResponse
+} from '../middleware'
 
 const getHTTPMethod = (routeName: string): string => {
   switch (routeName) {
@@ -43,6 +46,7 @@ const createRouter: Services.CreateRouter = ({
     const endpoint = controller[routeName]
 
     const loginNotRequired = [
+      '/info/list',
       '/user/login',
       '/user/forgot-password',
       '/user/reset-password'
@@ -50,9 +54,16 @@ const createRouter: Services.CreateRouter = ({
 
     if (method && path) {
       if (loginNotRequired.includes(path)) {
-        router[method](path, endpoint, sendResponse)
+        router[method](path, logRequest, endpoint, sendResponse)
       } else {
-        router[method](path, verifyToken, verifyUser, endpoint, sendResponse)
+        router[method](
+          path,
+          verifyToken,
+          verifyUser,
+          logRequest,
+          endpoint,
+          sendResponse
+        )
       }
     }
   })

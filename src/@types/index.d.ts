@@ -20,16 +20,24 @@ interface CustomRequest extends Request {
 type CustomNextFunction = ({ status, data, err }?: DefaultResponse) => void
 
 export namespace Middleware {
-  export type VerifyUser = (
-    req: CustomRequest,
-    res: Response,
-    next: NextFunction
-  ) => void
   export type VerifyToken = (
     req: CustomRequest,
     res: Response,
     next: NextFunction
   ) => void
+
+  export type VerifyUser = (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+  ) => void
+
+  export type LogRequest = (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+  ) => void
+
   export type SendResponse = (
     { status, data, err }: DefaultResponse,
     req: CustomRequest,
@@ -45,7 +53,9 @@ export namespace Functions {
       res: Response,
       next: CustomNextFunction
     ) => Promise<void>
-
+    export interface Info {
+      list: Endpoint
+    }
     export interface Users {
       login: Endpoint
       logout: Endpoint
@@ -67,25 +77,13 @@ export namespace Functions {
 }
 
 export namespace Services {
-  export type GetUTC = (
-    timezone: string | undefined | null,
-    date: Date
-  ) => string | undefined
-
-  type scope = 'DATABASE' | 'CONTROLLER' | 'EMAIL_SHIPPING'
-
   export interface Log {
-    error: (scope: scope, err: Error) => void
-    info: (info: string) => void
+    error: (scope: string, err: Error) => void
+    info: (scope: string, info: string | { [key: string]: any }) => void
   }
 
   export namespace SendEmail {
-    type HandlebarsTemplate =
-      | 'maintenanceCreate'
-      | 'maintenanceUpdate'
-      | 'correctiveMaintenance'
-      | 'preventiveMaintenance'
-      | 'resetPassword'
+    type HandlebarsTemplate = 'resetPassword'
 
     interface MaintenanceData {
       guide: string

@@ -1,7 +1,7 @@
-import { generateRouter } from '../../services'
+import { createRouter } from '../../services'
 import controller from './controller'
 
-export default generateRouter({
+export default createRouter({
   controller,
   controllerName: 'user'
 })

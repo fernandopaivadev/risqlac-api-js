@@ -2,20 +2,31 @@ import { Middleware } from '../@types'
 import { log } from '../services'
 
 const SendResponse: Middleware.SendResponse = async (
-  { status, data, err }, req, res, next
+  { status, data, err },
+  req,
+  res,
+  next
 ) => {
   if (!res.headersSent) {
-    if (err) {
-      log.error('CONTROLLER', err)
-      res.status(500).json({
-        error: {
-          route: req.path,
-          message: err.message
+    const _status = err || !status ? 500 : status
+    const _data = err
+      ? {
+          error: {
+            route: req.path,
+            message:
+              typeof err.message === 'object'
+                ? JSON.stringify(err, null, 2)
+                : err.message
+          }
         }
-      })
-    } else if (status) {
-      res.status(status).json(data)
-    }
+      : data
+
+    log.info('RESPONSE', {
+      status: _status,
+      data: _data
+    })
+
+    res.status(_status).json(_data)
   }
 }
 
