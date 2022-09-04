@@ -2,7 +2,6 @@ import compression from 'compression'
 import cors from 'cors'
 import express, { json, urlencoded } from 'express'
 import helmet from 'helmet'
-import morgan from 'morgan'
 
 import { Services } from '../@types'
 
@@ -19,11 +18,6 @@ const createApp: Services.CreateApp = router => {
   app.use(helmet())
   app.use(json())
   app.use(urlencoded({ extended: true }))
-  app.use(
-    morgan('tiny', {
-      skip: (req, res) => req.path === '/user/login'
-    })
-  )
 
   app.use('/', router)
 

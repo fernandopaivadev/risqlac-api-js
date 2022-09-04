@@ -5,7 +5,7 @@ provider:
   name: aws
   runtime: nodejs16.x
   region: sa-east-1
-  profile: personal
+  profile: fernandopaiva
   stage: ${opt:stage, 'dev'}
   logRetentionInDays: ${self:custom.logRetentionInDays.${self:provider.stage}}
   memorySize: 256
