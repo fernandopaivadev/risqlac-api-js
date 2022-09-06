@@ -12,7 +12,7 @@ interface DefaultResponse {
 }
 
 interface CustomRequest extends Request {
-  userId?: string
+  userId?: number
   token?: string
   user?: Omit<user, 'hashed_password'> | void | null
 }
@@ -83,7 +83,7 @@ export namespace Services {
   }
 
   export namespace SendEmail {
-    type HandlebarsTemplate = 'resetPassword'
+    type HandlebarsTemplate = 'resetPassword' | 'userCreate'
 
     interface MaintenanceData {
       guide: string
@@ -98,6 +98,12 @@ export namespace Services {
       token: string
     }
 
+    interface UserCreateData {
+      username: string
+      email: string
+      password: string
+    }
+
     export type SendEmailFunction = ({
       from,
       to,
@@ -110,7 +116,7 @@ export namespace Services {
       to: string | string[]
       subject: string
       template: HandlebarsTemplate
-      data: MaintenanceData | ResetPasswordData
+      data: MaintenanceData | ResetPasswordData | UserCreateData
       attachments?: Attachment[]
     }) => Promise<void>
   }

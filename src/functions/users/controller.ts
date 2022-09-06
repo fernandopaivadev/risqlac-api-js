@@ -126,7 +126,7 @@ export default {
           next({ err })
         } else {
           const password = String(req.body.password)
-          const id = String(payload?.id)
+          const id = Number(payload?.id)
 
           if (password && id) {
             if (password.length < 8) {
@@ -155,7 +155,7 @@ export default {
                 await prisma.user
                   .update({
                     where: {
-                      id: String(id)
+                      id: Number(id)
                     },
                     data: {
                       hashed_password
@@ -230,25 +230,70 @@ export default {
     }
   },
 
-  create: async (req, res, next): Promise<void> => {
+  create: async (req, res, next) => {
     const { user } = req
     const body = {
       ...req.body
     }
 
     if (user?.is_admin) {
+      const generatedPassword = Math.random().toString(32).slice(2)
+
       body.hashed_password = await hash(
-        body.password.length >= 8 ? body.password : 'Risqlac+2022',
+        generatedPassword,
         Math.floor(Math.random() * 10 + 10)
       )
 
+      body.created_at = new Date()
+      body.updated_at = new Date()
+
+      const personToCreate = body.people[0]
+      const companyToCreate = body.companies[0]
+
       delete body.password
-      body.created_at, (body.updated_at = new Date())
+      delete body.people
+      delete body.companies
+
+      const data = companyToCreate
+        ? {
+            ...body,
+            people: {
+              create: {
+                birth: new Date(personToCreate.birth),
+                cpf: personToCreate.cpf,
+                name: personToCreate.name,
+                created_at: new Date(),
+                updated_at: new Date()
+              }
+            },
+            companies: {
+              create: {
+                cnpj: companyToCreate.cnpj,
+                description: companyToCreate.description,
+                name: companyToCreate.name,
+                trade_name: companyToCreate.trade_name,
+                created_at: new Date(),
+                updated_at: new Date()
+              }
+            }
+          }
+        : {
+            ...body,
+            people: {
+              create: {
+                birth: new Date(personToCreate.birth),
+                cpf: personToCreate.cpf,
+                name: personToCreate.name,
+                created_at: new Date(),
+                updated_at: new Date()
+              }
+            }
+          }
 
       if (
         await prisma.user
           .create({
-            data: body
+            data
           })
           .catch((err: Error) => {
             next({
@@ -256,8 +301,23 @@ export default {
             })
           })
       ) {
+        sendEmail({
+          from: config.EMAIL_CONFIG_AUTH_USER,
+          to: body.email,
+          subject: 'Bem vindo ao RisqLAC',
+          template: 'userCreate',
+          data: {
+            email: body.email,
+            username: body.username,
+            password: generatedPassword
+          }
+        })
+
         next({
-          status: 201
+          status: 201,
+          data: {
+            generatedPassword
+          }
         })
       }
     } else {
@@ -278,7 +338,7 @@ export default {
         await prisma.user
           .update({
             where: {
-              id: String(body.id)
+              id: Number(body.id)
             },
             data: body
           })
@@ -299,7 +359,7 @@ export default {
     }
   },
 
-  delete: async (req, res, next): Promise<void> => {
+  delete: async (req, res, next) => {
     const { user } = req
     const id = req.query.id
 
@@ -309,7 +369,7 @@ export default {
           await prisma.user
             .delete({
               where: {
-                id: String(id)
+                id: Number(id)
               }
             })
             .catch((err: Error) => {

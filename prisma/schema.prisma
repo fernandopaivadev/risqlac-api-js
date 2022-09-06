@@ -9,7 +9,7 @@ datasource db {
 }
 
 model user {
-  id              String   @id @default(uuid()) @db.VarChar(255)
+  id              Int      @id @default(autoincrement())
   username        String   @db.VarChar(32)
   name            String   @db.VarChar(255)
   email           String   @db.VarChar(64)
@@ -21,7 +21,7 @@ model user {
 }
 
 model product {
-  id              String   @id @default(uuid()) @db.VarChar(255)
+  id              Int      @id @default(autoincrement())
   synonym         String
   class           String
   subclass        String
@@ -36,9 +36,4 @@ model product {
   due_date        String?
   location        String?
   quantity        String?
-}
-
-enum user_access_level {
-  admin
-  student
 }

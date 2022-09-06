@@ -13,8 +13,8 @@ const verifyToken: Middleware.VerifyToken = async (req, res, next) => {
       if (err) {
         res.status(401).send()
       } else {
-        const id = String(payload?.id)
-        req.userId = id
+        console.log(payload)
+        req.userId = Number(payload?.id)
         next()
       }
     })

@@ -67,7 +67,7 @@ export default {
           await prisma.product
             .update({
               where: {
-                id: String(id)
+                id: Number(id)
               },
               data: body
             })
@@ -101,7 +101,7 @@ export default {
           await prisma.product
             .delete({
               where: {
-                id: String(id)
+                id: Number(id)
               }
             })
             .catch((err: Error) => {
